@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bos Alung — HR Manager AI · Hayuna AI</title>
+<meta name="description" content="Bos Alung adalah HR Manager AI yang aktif training, profiling, dan scoring karyawan via chat natural. Privacy-first dengan 6 prinsip etika locked.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #0F4C5C;
+    --primary-light: #1A6B7C;
+    --primary-dark: #08323D;
+    --sand: #FBF7F2;
+    --sand-dark: #F0E9DD;
+    --terracotta: #D4823A;
+    --terracotta-light: #E89E5F;
+    --sage: #73A580;
+    --sage-light: #95C0A2;
+    --amber: #E6A817;
+    --brick: #B83A2A;
+    --text: #1A1A1A;
+    --muted: #6B6B6B;
+    --border: #E5DDD0;
+    --white: #FFFFFF;
+  }
+  * { font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--sand); color: var(--text); }
+
+  .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease-out, transform 0.9s ease-out; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  @keyframes hero-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-stagger > * { opacity: 0; animation: hero-fade-up 1s ease-out forwards; }
+  .hero-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-stagger > *:nth-child(2) { animation-delay: 0.3s; }
+  .hero-stagger > *:nth-child(3) { animation-delay: 0.5s; }
+  .hero-stagger > *:nth-child(4) { animation-delay: 0.7s; }
+  .hero-stagger > *:nth-child(5) { animation-delay: 0.9s; }
+
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--primary); transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+  .status-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  /* Chat bubble */
+  @keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .chat-bubble { opacity: 0; animation: bubble-in 0.5s ease-out forwards; }
+  .chat-demo.visible .chat-bubble-1 { animation-delay: 0.2s; }
+  .chat-demo.visible .chat-bubble-2 { animation-delay: 0.8s; }
+  .chat-demo.visible .chat-bubble-3 { animation-delay: 1.4s; }
+  .chat-demo.visible .chat-bubble-4 { animation-delay: 2.0s; }
+  .chat-demo.visible .chat-bubble-5 { animation-delay: 2.6s; }
+  .chat-demo:not(.visible) .chat-bubble { animation-play-state: paused; }
+
+  /* Use case step animation */
+  .use-case-step {
+    transition: all 0.4s ease-out;
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  .use-case.visible .use-case-step { opacity: 1; transform: translateX(0); }
+  .use-case.visible .step-1 { transition-delay: 0.15s; }
+  .use-case.visible .step-2 { transition-delay: 0.3s; }
+  .use-case.visible .step-3 { transition-delay: 0.45s; }
+  .use-case.visible .step-4 { transition-delay: 0.6s; }
+
+  /* Dashboard frame */
+  .dashboard-frame {
+    border: 8px solid var(--primary-dark);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -20px rgba(8, 50, 61, 0.4);
+    background: var(--sand);
+  }
+  .dashboard-frame iframe {
+    width: 100%;
+    height: 720px;
+    border: 0;
+    display: block;
+  }
+
+  /* Cards */
+  .lift-hover { transition: all 0.3s ease; }
+  .lift-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -16px rgba(15, 76, 92, 0.15); }
+
+  .mobile-menu { transform: translateY(-100%); transition: transform 0.3s ease; }
+  .mobile-menu.open { transform: translateY(0); }
+
+  .divider-ornament { display: flex; align-items: center; gap: 1rem; }
+  .divider-ornament::before, .divider-ornament::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @keyframes scroll-bounce { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(8px); opacity: 1; } }
+  .scroll-indicator { animation: scroll-bounce 2s ease-in-out infinite; }
+
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); }
+
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  .font-display { letter-spacing: -0.025em; }
+
+  /* Phase marker */
+  .phase-marker { position: relative; padding-left: 2rem; border-left: 2px solid var(--border); padding-bottom: 2rem; }
+  .phase-marker:last-child { padding-bottom: 0; }
+  .phase-marker::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--primary); }
+  .phase-marker.now::before { background: var(--terracotta); border-color: var(--terracotta); box-shadow: 0 0 0 4px rgba(212, 130, 58, 0.2); }
+
+  /* Principle card */
+  .principle-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .principle-card:hover { transform: translateY(-3px); border-color: var(--terracotta) !important; }
+</style>
+</head>
+
+<body class="overflow-x-hidden">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50" style="background: rgba(251, 247, 242, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2.5">
+      <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="none" stroke="var(--primary)" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="9" fill="none" stroke="var(--primary)" stroke-width="0.8"/>
+        <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+        <line x1="16" y1="1" x2="16" y2="5" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="16" y1="27" x2="16" y2="31" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="1" y1="16" x2="5" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="27" y1="16" x2="31" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+      </svg>
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-display text-xl font-medium" style="color: var(--primary);">Hayuna</span>
+        <span class="text-[10px] font-mono uppercase tracking-widest" style="color: var(--muted);">AI</span>
+      </div>
+    </a>
+    <div class="hidden md:flex items-center gap-9 text-sm" style="color: var(--text);">
+      <a href="index.html" class="nav-link">Beranda</a>
+      <a href="index.html#tim" class="nav-link">Tim AI</a>
+      <a href="budi.html" class="nav-link">Budi</a>
+      <a href="#cara-kerja" class="nav-link">Cara Kerja</a>
+      <a href="#prinsip" class="nav-link">6 Prinsip</a>
+      <a href="#dashboard" class="nav-link">Dashboard</a>
+    </div>
+    <button id="burger" class="md:hidden p-2" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text);">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0" style="background: var(--sand); border-bottom: 1px solid var(--border);">
+    <div class="flex flex-col p-6 gap-5 text-base">
+      <a href="index.html" class="mobile-link" style="color: var(--text);">← Beranda</a>
+      <a href="index.html#tim" class="mobile-link" style="color: var(--text);">Tim AI</a>
+      <a href="budi.html" class="mobile-link" style="color: var(--text);">Budi</a>
+      <a href="#cara-kerja" class="mobile-link" style="color: var(--text);">Cara Kerja</a>
+      <a href="#prinsip" class="mobile-link" style="color: var(--text);">6 Prinsip Etika</a>
+      <a href="#dashboard" class="mobile-link" style="color: var(--text);">Owner Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-5 sm:px-8 overflow-hidden" style="background: var(--sand);">
+  <div class="grain"></div>
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="hero-stagger">
+      <div class="mb-8">
+        <a href="index.html" class="text-[11px] font-mono uppercase tracking-[0.2em] hover:opacity-100 opacity-70 transition inline-flex items-center gap-2" style="color: var(--primary);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Hayuna AI · Tim AI · Bos Alung
+        </a>
+      </div>
+
+      <div class="mb-8">
+        <span class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full" style="background: rgba(212, 130, 58, 0.15); color: var(--terracotta);">
+          <span class="w-2 h-2 rounded-full" style="background: var(--terracotta);"></span>
+          DALAM PENGEMBANGAN · Q3 2026
+        </span>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="font-display text-6xl sm:text-9xl font-medium leading-none mb-4" style="color: var(--primary);">Bos Alung</h1>
+        <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.25em]" style="color: var(--terracotta);">HR Manager AI</p>
+      </div>
+
+      <p class="text-lg sm:text-2xl max-w-3xl leading-relaxed mb-8" style="color: var(--text);">
+        AI yang aktif <em class="font-display italic" style="color: var(--terracotta);">melakukan kerja HR</em> — training, profiling, dan scoring karyawan via chat natural. Bukan sistem yang hanya mencatat absensi dan payroll.
+      </p>
+
+      <div class="flex flex-wrap gap-x-10 gap-y-4 mt-12">
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Channel</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">Telegram</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Dimensi Score</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">5</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Prinsip Etika</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">6 locked</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Anchor Klien</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">LFT</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- KENAPA BOS ALUNG -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">01 / Masalah</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        HR di F&amp;B beda dari corporate.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: var(--text);">
+        Turnover karyawan F&amp;B Indonesia rata-rata di atas 50% per tahun. Training delivery selalu jadi beban — modul printed gak dibaca, video LMS gak ditonton, form quiz gak diisi. Performance review berbasis intuisi owner. Itu reality yang kami bangun Bos Alung untuk pecahkan.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 reveal reveal-delay-1">
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Launch menu baru = chaos</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Owner bagi materi training. Manager forward ke staff. Staff janji baca, sebagian baca, sebagian engga. Hari launch — kualitas tidak konsisten antar staff. Customer kecewa, owner panik.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Promosi based on feeling</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          "Si X kerjanya rajin, kasih promosi yuk." Tapi rajin doang tidak cukup. Sebenarnya skill-nya cukup? Etika-nya? Konsistensi-nya? Tidak ada data objektif. Promosi keliru = staff lain demotivated, atau yang dipromosi gagal.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Fraud susah dideteksi</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Stok hilang, kasir hitung kurang, supplier kongkalikong — owner tahu ada masalah, tapi siapa pelakunya? CCTV cuma rekam, tidak reasoning. Tanya langsung — yang ngaku malah yang innocent.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Software HR terlalu corporate</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Talenta, Mekari, dan setara dirancang untuk kantor — attendance, payroll, leave management. Tidak ada yang active training delivery atau performance scoring berbasis percakapan natural.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARA KERJA — 2 SIDED -->
+<section id="cara-kerja" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal text-center mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">02 / Cara Kerja</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Karyawan ngobrol. Owner buka dashboard.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: var(--text);">
+        Bos Alung jadi jembatan dua arah. Di satu sisi, chat natural dengan karyawan setiap hari. Di sisi lain, laporan terkonsolidasi untuk owner — auto-populated dari hasil kerja AI di chat.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 items-start chat-demo">
+
+      <!-- LEFT: Chat with employee -->
+      <div class="reveal reveal-delay-1">
+        <div class="mb-4">
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta);">
+            SIDE 01 — Chat dengan Karyawan
+          </p>
+          <h3 class="font-display text-2xl font-medium" style="color: var(--primary);">Ngobrol seperti teman</h3>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <!-- Chat header -->
+          <div class="px-5 py-4 flex items-center gap-3" style="background: var(--primary); color: var(--sand);">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-medium" style="background: var(--terracotta); color: var(--sand);">A</div>
+            <div>
+              <p class="font-medium text-sm">Bos Alung</p>
+              <p class="text-[11px] opacity-70 font-mono">@BosAlung_BOT · online</p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3 min-h-[480px]" style="background: var(--sand);">
+
+            <!-- Bos Alung kasih materi -->
+            <div class="chat-bubble chat-bubble-1 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Halo Andi! Kemarin owner share materi <strong>Mie Ayam Khas Bandung</strong> ya. Udah sempet baca?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">09:14</p>
+              </div>
+            </div>
+
+            <!-- Andi reply -->
+            <div class="chat-bubble chat-bubble-2 flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">Sudah Bu, semalem baca sambil ngopi 😅</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">09:15</p>
+              </div>
+            </div>
+
+            <!-- Bos Alung quiz -->
+            <div class="chat-bubble chat-bubble-3 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Mantap! Saya cek pemahaman bentar ya. Suhu masak ideal kuah Mie Ayam berapa derajat?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">09:16 · Quiz mode</p>
+              </div>
+            </div>
+
+            <!-- Bos Alung essay -->
+            <div class="chat-bubble chat-bubble-4 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Coba ceritain step-by-step plating-nya bro — bumbu mana yang dituang duluan?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">09:17 · Essay singkat</p>
+              </div>
+            </div>
+
+            <!-- Bos Alung profiling -->
+            <div class="chat-bubble chat-bubble-5 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  By the way, kerjaan minggu ini gimana? Ada yang bikin susah gak?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">09:20 · Profiling chat</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs mt-4 italic leading-relaxed" style="color: var(--muted);">
+          Bos Alung mengaktifkan chat natural — bukan form survey. Karyawan merasa ngobrol, bukan diinterogasi. Profiling subtle tanpa entrapment (prinsip etika #4).
+        </p>
+      </div>
+
+      <!-- RIGHT: Owner dashboard -->
+      <div class="reveal reveal-delay-2">
+        <div class="mb-4">
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta);">
+            SIDE 02 — Dashboard Owner
+          </p>
+          <h3 class="font-display text-2xl font-medium" style="color: var(--primary);">Laporan terkonsolidasi</h3>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <!-- Mock dashboard preview -->
+          <div class="px-5 py-4 flex items-center justify-between" style="background: var(--primary-dark); color: var(--sand);">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs uppercase tracking-wider">Dashboard · Andi Wijaya</span>
+            </div>
+            <span class="text-[10px] font-mono opacity-60">live update</span>
+          </div>
+
+          <div class="p-5 space-y-4 min-h-[480px]" style="background: var(--white);">
+            <!-- Composite score -->
+            <div class="p-4 rounded-xl" style="background: var(--sand);">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-mono uppercase tracking-wider" style="color: var(--muted);">Composite Score</p>
+                <p class="font-display text-3xl font-medium" style="color: var(--primary);">78</p>
+              </div>
+              <div class="grid grid-cols-5 gap-2">
+                <div>
+                  <div class="h-1.5 rounded-full mb-1" style="background: var(--sand-dark);"><div class="h-full rounded-full" style="width: 73%; background: var(--primary);"></div></div>
+                  <p class="text-[9px] font-mono" style="color: var(--muted);">SKILL · 73</p>
+                </div>
+                <div>
+                  <div class="h-1.5 rounded-full mb-1" style="background: var(--sand-dark);"><div class="h-full rounded-full" style="width: 80%; background: var(--sage);"></div></div>
+                  <p class="text-[9px] font-mono" style="color: var(--muted);">ETIKA · 80</p>
+                </div>
+                <div>
+                  <div class="h-1.5 rounded-full mb-1" style="background: var(--sand-dark);"><div class="h-full rounded-full" style="width: 75%; background: var(--primary);"></div></div>
+                  <p class="text-[9px] font-mono" style="color: var(--muted);">KONS · 75</p>
+                </div>
+                <div>
+                  <div class="h-1.5 rounded-full mb-1" style="background: var(--sand-dark);"><div class="h-full rounded-full" style="width: 83%; background: var(--sage);"></div></div>
+                  <p class="text-[9px] font-mono" style="color: var(--muted);">ENG · 83</p>
+                </div>
+                <div>
+                  <div class="h-1.5 rounded-full mb-1" style="background: var(--sand-dark);"><div class="h-full rounded-full" style="width: 77%; background: var(--primary);"></div></div>
+                  <p class="text-[9px] font-mono" style="color: var(--muted);">LOY · 77</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity -->
+            <div>
+              <p class="text-xs font-mono uppercase tracking-wider mb-3" style="color: var(--muted);">Aktivitas Bos Alung</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--sage);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Quiz Mie Ayam selesai — nilai <strong>82</strong></p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">5 menit lalu</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--terracotta);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Essay plating — submitted, AI analyzing...</p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">3 menit lalu</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--primary);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Profiling chat — engagement positive</p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">baru saja</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Decision -->
+            <div class="p-3 rounded-lg" style="background: rgba(115, 165, 128, 0.08); border-left: 3px solid var(--sage);">
+              <p class="text-xs font-medium mb-1" style="color: var(--sage);">REKOMENDASI BOS ALUNG</p>
+              <p class="text-xs" style="color: var(--text);">Andi siap untuk launch Mie Ayam Senin. Comprehension level: <strong>Above threshold</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs mt-4 italic leading-relaxed" style="color: var(--muted);">
+          Owner buka dashboard saat butuh decision — pre-launch, evaluasi periodik, atau follow up flag. Bukan dashboard yang harus ditonton tiap hari.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 USE CASE -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">03 / Use Case</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight max-w-3xl" style="color: var(--primary);">
+        Tiga skenario nyata.
+      </h2>
+    </div>
+
+    <div class="space-y-12">
+
+      <!-- USE CASE 1: Launch Menu Baru -->
+      <div class="reveal reveal-delay-1 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">USE CASE 01</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Launch Menu Baru</h3>
+            <p class="text-sm" style="color: var(--muted);">Owner mau launch Mie Ayam Khas Bandung minggu depan. Bagaimana memastikan 5 staff dapur paham SOP?</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--terracotta);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Owner brief Bos Alung</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">"Bos Alung, ini materi Mie Ayam — distribute ke semua staff dapur, pastikan paham sebelum Senin."</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--terracotta);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Distribute + Quiz</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Bos Alung send ke 5 staff. Follow up: quiz multiple choice + essay singkat. Format chat, bukan form.</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--terracotta);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Dashboard laporan</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Hari ke-3, owner buka dashboard: "3 lulus, 2 perlu remedial". Detail per staff visible.</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(212, 130, 58, 0.08);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--terracotta);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Decision</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Owner: "Launch Senin. Si Budi handle prep dulu, masih perlu re-training." Aman, terukur.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USE CASE 2: Promosi -->
+      <div class="reveal reveal-delay-2 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(115, 165, 128, 0.12); color: var(--sage);">USE CASE 02</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Promosi Karyawan</h3>
+            <p class="text-sm" style="color: var(--muted);">Citra Lestari (Captain Server, 2 tahun) tampak ready untuk Supervisor Outlet. Tapi data objektif-nya gimana?</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Owner cek dashboard</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Buka profil Citra: composite score 92. Skill 88, Etika 94, Konsistensi 89, Engagement 95, Loyalty 91.</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Final exam essay</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Owner trigger: "Send final exam essay." Bos Alung kasih pertanyaan: "Visi 1 tahun ke depan kalau jadi Supervisor?"</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Submitted + analysis</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Citra submit. Bos Alung kasih ringkasan ke owner — visi clear, ada concrete plan, leadership tone present.</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(115, 165, 128, 0.08);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Owner approve</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Multi-data decision: score, masa kerja, essay. Owner approve. Bukan based on feeling — based on tracking.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USE CASE 3: Anti-Fraud -->
+      <div class="reveal reveal-delay-3 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(184, 58, 42, 0.10); color: var(--brick);">USE CASE 03</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Anti-Fraud Detection</h3>
+            <p class="text-sm" style="color: var(--muted);">Gita Maharani jawaban scenario etika berubah signifikan dari minggu lalu. Tanpa konfrontasi, bagaimana follow up?</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Profiling rutin</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Bos Alung chat random scheduled — termasuk scenario etika ringan (e.g., "kalau ada barang jatuh, kamu cara mana?").</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Detect inkonsistensi</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Bos Alung compare jawaban week-over-week. Pattern berubah signifikan → flag HIGH severity ke dashboard.</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Owner review flag</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Owner cek detail flag: jawaban lama vs baru, context. Bukan tuduhan — sinyal yang perlu dilihat.</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(184, 58, 42, 0.06);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Human follow up</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Owner ngobrol langsung dengan Gita — bukan accusatory, tapi check in. AI cuma kasih sinyal. Decision manusia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 PRINSIP ETIKA -->
+<section id="prinsip" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16 text-center">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">04 / Etika</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl mx-auto" style="color: var(--sand);">
+        Enam prinsip etika.<br>Locked sebelum kode ditulis.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+        Bos Alung menyentuh data sensitif — performance, etika, sinyal loyalty karyawan. Kami menulis prinsip etika dulu sebelum menulis code. Bukan retrofit, bukan PR — fondasi arsitektural.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-1" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">01</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Profiling = deteksi potensi, bukan vonis</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Bos Alung kasih sinyal — owner yang decide. AI bukan jaksa, bukan hakim.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-1" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">02</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Pemecatan tidak berdasarkan 1 poin Bos Alung</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Keputusan besar wajib kombinasi multi-data. AI tidak boleh jadi alasan tunggal terminasi.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-2" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">03</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Rolling/promosi multi-data</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Minimum 3 data point: composite score, masa kerja, dan catatan Bos Afung. Bukan single-source decision.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-2" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">04</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Tidak ada perangkap</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Pertanyaan boleh terselubung untuk profiling, tapi tidak menggiring karyawan mengaku sesuatu yang tidak benar.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-3" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">05</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Akses data terbatas + audit log</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Owner & developer (sementara) — setelah handover, full owner. Setiap akses ke data karyawan di-log.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-3" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--terracotta-light);">06</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Bos Alung adalah TOOL, bukan decision maker</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Setiap keputusan HR — hire, fire, promote, demote — final say manusia. AI advisor, bukan autonomous agent.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disclosure -->
+    <div class="reveal reveal-delay-4 mt-12 p-6 sm:p-8 rounded-xl" style="background: var(--primary-dark);">
+      <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">DISCLOSURE WAJIB DAY 1</p>
+      <p class="font-display italic text-base sm:text-lg leading-relaxed" style="color: var(--sand);">
+        "Halo! Saya Bos Alung, HR Manager LFT. Saya akan menemani kamu selama bekerja di sini — kasih materi training, ngobrol-ngobrol soal kerjaan, dan bantu kamu berkembang. Anggap saya teman ngobrol aja ya. Semua percakapan kita akan dijadikan masukan untuk owner soal perkembangan kamu di LFT."
+      </p>
+      <p class="text-xs mt-4 font-mono" style="color: rgba(251, 247, 242, 0.5);">
+        Karyawan tahu mereka berkomunikasi dengan HR AI. Tidak ada deception — tapi mekanisme detail profiling tidak perlu di-expose (fair game).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ANATOMI — 3 ENGINE -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">05 / Anatomi</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight max-w-3xl" style="color: var(--primary);">
+        Tiga engine di balik chat.
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(115, 165, 128, 0.12);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage);">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <polyline points="17 11 19 13 23 9"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">ENGINE 01</p>
+        <h3 class="font-display text-2xl font-medium mb-3" style="color: var(--primary);">Onboarding Engine</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Training karyawan baru — 90 hari structured journey. Modul delivery, quiz progressive, mid-probation review (day 30), final eval (day 90).
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--sage);">+</span> Modul library reusable</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--sage);">+</span> Quiz adaptive per role</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--sage);">+</span> Day 30 + 90 auto-eval</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(15, 76, 92, 0.10);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary);">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">ENGINE 02</p>
+        <h3 class="font-display text-2xl font-medium mb-3" style="color: var(--primary);">Profiling Engine</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Chat continuous dengan karyawan — random scheduled, bahasa natural, tidak terasa interogatif. Track engagement, etika, sinyal loyalty.
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> Scenario etika subtle</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> Anti-manipulation detection</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> Personal language adaptation</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(212, 130, 58, 0.12);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta);">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">ENGINE 03</p>
+        <h3 class="font-display text-2xl font-medium mb-3" style="color: var(--primary);">Scoring Engine</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          5 dimensi composite score: Skill (25%), Etika (30%), Konsistensi (20%), Engagement (15%), Loyalty (10%). Update bulanan.
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--terracotta);">+</span> Weighted multi-dimensi</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--terracotta);">+</span> Threshold action level</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--terracotta);">+</span> Multi-data decision rule</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VS SAAS HRIS -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">06 / Perbandingan</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Yang tidak ada di SaaS HRIS.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: var(--text);">
+        Software HRIS tradisional fokus mencatat — attendance, payroll, leave. Bos Alung fokus <em class="font-display italic" style="color: var(--terracotta);">melakukan kerja HR</em>. Beda fundamental.
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-1 rounded-2xl overflow-hidden" style="border: 1px solid var(--border);">
+      <!-- Header row -->
+      <div class="grid grid-cols-3 text-xs sm:text-sm font-mono uppercase tracking-wider" style="background: var(--primary); color: var(--sand);">
+        <div class="p-4 sm:p-5">Dimensi</div>
+        <div class="p-4 sm:p-5" style="border-left: 1px solid rgba(251, 247, 242, 0.1);">SaaS HRIS Tradisional</div>
+        <div class="p-4 sm:p-5" style="border-left: 1px solid rgba(251, 247, 242, 0.1); background: var(--primary-dark);">Bos Alung</div>
+      </div>
+
+      <!-- Rows -->
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Mode interaksi</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Form web + dashboard input manual</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Chat natural di Telegram, auto-extract</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Yang ditrack</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Attendance, payroll, leave, basic KPI</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Skill, Etika, Konsistensi, Engagement, Loyalty</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Training delivery</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Upload video ke LMS, hope staff nonton</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">AI aktif chat: distribute, quiz, verify pemahaman</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Quiz format</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Form web — kaku, staff males isi</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Multiple choice + essay via chat — feel ngobrol</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Promosi decision</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Based on tenure + manager feel</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Multi-data composite score + final exam essay</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border);">Anti-fraud</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border);">Tidak ada (out of scope)</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Inkonsistensi detection, scenario etika tracking</div>
+      </div>
+
+      <div class="grid grid-cols-3 text-xs sm:text-sm" style="background: var(--white);">
+        <div class="p-4 sm:p-5 font-medium" style="color: var(--primary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">Privacy model</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">Cloud SaaS, data di server vendor</div>
+        <div class="p-4 sm:p-5" style="color: var(--text); border-top: 1px solid var(--border); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(212, 130, 58, 0.05);">Klien own Sheets, Hayuna own bot — cabut anytime</div>
+      </div>
+    </div>
+
+    <p class="reveal reveal-delay-2 font-display italic text-base sm:text-lg text-center mt-12 max-w-2xl mx-auto" style="color: var(--muted);">
+      "SaaS HRIS mencatat kerja HR. Bos Alung melakukan kerja HR."
+    </p>
+  </div>
+</section>
+
+<!-- DASHBOARD EMBED -->
+<section id="dashboard" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">07 / Owner Dashboard</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Mockup interaktif dashboard.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed mb-2" style="color: var(--text);">
+        Live mockup untuk explorasi. Coba navigasi — Karyawan, Onboarding, Promosi, Flags. Setiap page menampilkan data yang Bos Alung kumpulkan dari chat dengan staff.
+      </p>
+      <p class="text-xs font-mono uppercase tracking-wider" style="color: var(--terracotta);">
+        ⚠ MOCKUP · Kode belum aktif · Q3 2026 development target
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-1 dashboard-frame">
+      <iframe src="bos-alung-dashboard.html" title="Bos Alung Dashboard Mockup" loading="lazy"></iframe>
+    </div>
+
+    <div class="reveal reveal-delay-2 mt-8 grid sm:grid-cols-2 gap-4">
+      <div class="p-5 rounded-xl" style="background: var(--sand-dark);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--terracotta);">FUNGSI 01</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Pre-launch verification</strong> — Sebelum launch menu baru atau event, cek siapa staff yang siap, siapa yang masih perlu remedial.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--sand-dark);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--terracotta);">FUNGSI 02</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Promotion decision support</strong> — Composite score 5 dimensi + history quiz + essay final exam jadi basis decision objektif.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--sand-dark);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--terracotta);">FUNGSI 03</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Flag review</strong> — Alert otomatis dari Bos Alung yang butuh perhatian owner. High/Medium/Low severity.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--sand-dark);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--terracotta);">FUNGSI 04</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Audit trail</strong> — Setiap akses ke data karyawan tercatat. Privacy enforcement, bukan janji marketing.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY ARCHITECTURE -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-5 gap-12 items-start">
+      <div class="md:col-span-2 reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">08 / Privacy</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--sand);">
+          Data karyawan<br>= data sensitif.
+        </h2>
+        <p class="text-base leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          Bukan data biasa. Beda treatment, beda guardrail, beda audit trail.
+        </p>
+      </div>
+
+      <div class="md:col-span-3 reveal reveal-delay-1 space-y-4">
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(115, 165, 128, 0.2); color: var(--sage-light);">KLIEN OWN</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Google Sheets + Telegram</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Semua data karyawan — profil, quiz, chat history, scoring — di Sheets milik klien. Grup Telegram di akun klien. Hayuna hanya bot.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(212, 130, 58, 0.2); color: var(--terracotta-light);">AUDIT LOG</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Setiap akses tercatat</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Owner buka profil siapa, jam berapa, di-log. Developer akses untuk debugging, di-log. Tidak ada akses silent.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(15, 76, 92, 0.4); color: var(--sand);">EMPLOYEE RIGHTS</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Karyawan boleh lihat data sendiri</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Karyawan request "lihat data saya" — terima ringkasan composite score. Raw chat tidak dibuka. Privacy respect bidirectional.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CROSS-FLOW -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">09 / Cross-Flow</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+          Bos Alung ↔ Bos Afung.
+        </h2>
+        <p class="text-base leading-relaxed mb-4" style="color: var(--text);">
+          Bos Alung kerja sama dengan <strong style="color: var(--primary);">Bos Afung</strong> (Operasional Manager) untuk data disiplin staff — siapa skip checklist pagi, siapa konsisten on-time, siapa lambat closing.
+        </p>
+        <p class="text-base leading-relaxed" style="color: var(--text);">
+          Bos Afung observe ritme operasional, kasih sinyal ke Bos Alung untuk dimensi <em class="font-display italic" style="color: var(--terracotta);">Konsistensi</em> dan <em class="font-display italic" style="color: var(--terracotta);">Engagement</em>. Bos Alung integrate ke composite score.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <svg viewBox="0 0 400 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <rect x="40" y="60" width="120" height="80" rx="8" fill="var(--white)" stroke="var(--terracotta)" stroke-width="2"/>
+            <text x="100" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--primary)">Bos Alung</text>
+            <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta)" letter-spacing="1">HR · Q3 2026</text>
+          </g>
+
+          <line x1="170" y1="100" x2="240" y2="100" stroke="var(--primary)" stroke-width="2" stroke-dasharray="4 4"/>
+          <polygon points="240,100 230,95 230,105" fill="var(--primary)"/>
+          <text x="205" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--primary)" letter-spacing="1">SCORE</text>
+
+          <line x1="240" y1="180" x2="170" y2="180" stroke="var(--primary)" stroke-width="2" stroke-dasharray="4 4"/>
+          <polygon points="170,180 180,175 180,185" fill="var(--primary)"/>
+          <text x="205" y="200" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--primary)" letter-spacing="1">← DISIPLIN DATA</text>
+
+          <g>
+            <rect x="250" y="60" width="120" height="80" rx="8" fill="var(--white)" stroke="var(--border)" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="310" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--primary)">Bos Afung</text>
+            <text x="310" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--muted)" letter-spacing="1">OPS · Q4 2026</text>
+          </g>
+
+          <text x="200" y="40" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta)" letter-spacing="2">CROSS-FLOW</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS & ROADMAP -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-4xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">10 / Status</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Status & Roadmap.
+      </h2>
+    </div>
+
+    <div class="reveal reveal-delay-1 grid sm:grid-cols-3 gap-4 mb-12">
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--sage);">✅ DONE</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Blueprint Locked</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Architecture document, data structure (11 tab Sheets), roadmap, 6 prinsip etika locked. Owner companion dashboard mockup live.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--terracotta);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta);">⏳ IN PROGRESS</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Bos Hayuna v1</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Orchestrator layer harus siap dulu. Bos Alung akan route via Bos Hayuna, bukan standalone. Phase 1 dependency.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--muted);">⏸ NEXT</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Code Development</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Q3 2026 target. Onboarding Engine dulu (paling well-defined), lalu Profiling, lalu Scoring. Eat own dog food di LFT.
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-2">
+      <p class="font-mono text-xs uppercase tracking-widest mb-8" style="color: var(--muted);">Sequencing Phase</p>
+
+      <div class="phase-marker now">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--terracotta);">
+          PHASE 1 — NOW · Foundation Lock <span class="ml-2 px-2 py-0.5 rounded text-[10px]" style="background: var(--terracotta); color: var(--sand);">CURRENT</span>
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Foundation + Bos Hayuna v1</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          LFT stabilization, Cici agentify, Bos Hayuna orchestrator. Blueprint Bos Alung sudah locked, menunggu foundation siap.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          PHASE 2 — Q3 2026
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Bos Alung Code Start</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Implementation Onboarding Engine dulu — high-impact, well-defined. Test di LFT internal. Profiling Engine + Scoring Engine bertahap.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          PHASE 3 — Q4 2026
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">External Klien Onboard</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Setelah LFT terbukti stabil, expand ke 3-5 klien Founder Member yang willing test fitur HR AI. Iterative refinement.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          BEYOND
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Sub-Specialist Expansion</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Future possible: Training sub-agent (Phase 5+), Compliance sub-agent (labor law). Defer sampai proven core need.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BACK TO ECOSYSTEM -->
+<section class="py-20 sm:py-28 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-3xl mx-auto text-center">
+    <div class="reveal">
+      <div class="divider-ornament mb-10">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--terracotta);">
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Lihat tim lengkapnya.
+      </h2>
+      <p class="text-base sm:text-lg leading-relaxed mb-10" style="color: var(--text);">
+        Bos Alung adalah satu dari enam anggota tim AI Hayuna. Saat ini Budi sudah live production di LFT — pendekatan AaaS yang sama akan diterapkan di Bos Alung.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="index.html#tim" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--primary); color: var(--sand);">
+          Tim AI Hayuna
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="budi.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--white); color: var(--primary); border: 1px solid var(--border);">
+          Detail Budi (Live)
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-16 px-5 sm:px-8" style="background: var(--primary-dark); color: rgba(251, 247, 242, 0.6);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="var(--sand)" stroke-width="1"/>
+            <circle cx="16" cy="16" r="9" fill="none" stroke="var(--sand)" stroke-width="0.8"/>
+            <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+          </svg>
+          <span class="font-display text-lg" style="color: var(--sand);">Hayuna AI</span>
+        </div>
+        <p class="text-xs leading-relaxed">
+          Tim AI Agent untuk operasional F&B Indonesia.<br>
+          Memayu hayuning bisnis Anda.
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Modul</p>
+        <ul class="space-y-2.5 text-xs">
+          <li><a href="budi.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Budi — Stok &amp; Gudang</a></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Cici — Customer Service</span></li>
+          <li><a href="bos-alung.html" class="opacity-100 transition" style="color: var(--terracotta-light);">→ Bos Alung — HR</a></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Bos Afung — Operasional</span></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Wulan — Finance</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Status</p>
+        <ul class="space-y-2.5 text-xs">
+          <li>Blueprint Locked v1.4</li>
+          <li>Code Q3 2026 Target</li>
+          <li>Bandung, Indonesia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t text-center text-xs" style="border-color: rgba(251, 247, 242, 0.1);">
+      © 2026 Hayuna AI · <span class="font-display italic">Memayu Hayuning Bawana</span> · Dibangun di Indonesia
+    </div>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobile-menu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  document.querySelectorAll('.mobile-link').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal, .chat-demo, .use-case').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

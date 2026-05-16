@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budi — Stok &amp; Gudang Manager AI · Hayuna AI</title>
+<meta name="description" content="Budi adalah manajer stok &amp; gudang AI yang live di LFT Central Kitchen. 329 transaksi, 100% reliability. Anti-fraud structural by design.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #0F4C5C;
+    --primary-light: #1A6B7C;
+    --primary-dark: #08323D;
+    --sand: #FBF7F2;
+    --sand-dark: #F0E9DD;
+    --terracotta: #D4823A;
+    --terracotta-light: #E89E5F;
+    --sage: #73A580;
+    --sage-light: #95C0A2;
+    --amber: #E6A817;
+    --brick: #B83A2A;
+    --text: #1A1A1A;
+    --muted: #6B6B6B;
+    --border: #E5DDD0;
+    --white: #FFFFFF;
+  }
+
+  * { font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--sand); color: var(--text); }
+
+  .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ═══ REVEALS ═══ */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease-out, transform 0.9s ease-out; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ═══ HERO STAGGER ═══ */
+  @keyframes hero-fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-stagger > * { opacity: 0; animation: hero-fade-up 1s ease-out forwards; }
+  .hero-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-stagger > *:nth-child(2) { animation-delay: 0.3s; }
+  .hero-stagger > *:nth-child(3) { animation-delay: 0.5s; }
+  .hero-stagger > *:nth-child(4) { animation-delay: 0.7s; }
+  .hero-stagger > *:nth-child(5) { animation-delay: 0.9s; }
+  .hero-stagger > *:nth-child(6) { animation-delay: 1.1s; }
+
+  /* ═══ NAV ═══ */
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--primary); transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+
+  /* ═══ STATUS BADGE PULSE ═══ */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.9); }
+  }
+  .status-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  /* ═══ CHAT BUBBLE ANIMATIONS ═══ */
+  @keyframes bubble-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .chat-bubble {
+    opacity: 0;
+    animation: bubble-in 0.5s ease-out forwards;
+  }
+  .chat-demo.visible .chat-bubble-1 { animation-delay: 0.2s; }
+  .chat-demo.visible .chat-bubble-2 { animation-delay: 0.8s; }
+  .chat-demo.visible .chat-bubble-3 { animation-delay: 1.4s; }
+  .chat-demo.visible .chat-bubble-4 { animation-delay: 2.0s; }
+  .chat-demo:not(.visible) .chat-bubble { animation-play-state: paused; }
+
+  /* ═══ TYPING INDICATOR ═══ */
+  @keyframes typing-dot {
+    0%, 60%, 100% { opacity: 0.3; }
+    30% { opacity: 1; }
+  }
+  .typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); margin-right: 3px; animation: typing-dot 1.4s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ═══ TIMELINE ═══ */
+  .timeline-marker {
+    position: relative;
+    padding-left: 2rem;
+    border-left: 2px solid var(--border);
+    padding-bottom: 2rem;
+  }
+  .timeline-marker:last-child { padding-bottom: 0; border-left: 2px solid transparent; }
+  .timeline-marker::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--primary);
+  }
+  .timeline-marker.milestone::before {
+    background: var(--sage);
+    border-color: var(--sage);
+    box-shadow: 0 0 0 4px rgba(115, 165, 128, 0.2);
+  }
+
+  /* ═══ CARDS ═══ */
+  .specialist-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .specialist-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -16px rgba(15, 76, 92, 0.18); }
+
+  /* ═══ COUNT UP ═══ */
+  .count-up { font-variant-numeric: tabular-nums; }
+
+  /* ═══ MOBILE MENU ═══ */
+  .mobile-menu { transform: translateY(-100%); transition: transform 0.3s ease; }
+  .mobile-menu.open { transform: translateY(0); }
+
+  /* ═══ SECTION DIVIDER ═══ */
+  .divider-ornament { display: flex; align-items: center; gap: 1rem; }
+  .divider-ornament::before, .divider-ornament::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ═══ SCROLL INDICATOR ═══ */
+  @keyframes scroll-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
+  .scroll-indicator { animation: scroll-bounce 2s ease-in-out infinite; }
+
+  /* ═══ GRAIN ═══ */
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); }
+
+  /* ═══ FLOW DIAGRAM ═══ */
+  @keyframes flow-pulse {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -20; }
+  }
+  .flow-line {
+    stroke-dasharray: 4 4;
+    animation: flow-pulse 2s linear infinite;
+  }
+
+  /* ═══ TYPOGRAPHY ═══ */
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  .font-display { letter-spacing: -0.025em; }
+
+  /* ═══ HOVER LIFT ═══ */
+  .lift-hover { transition: all 0.3s ease; }
+  .lift-hover:hover { transform: translateY(-2px); }
+
+  /* ═══ ORBIT for logo ═══ */
+  @keyframes orbit-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .orbit-slow { animation: orbit-rotate 60s linear infinite; transform-origin: center; }
+</style>
+</head>
+
+<body class="overflow-x-hidden">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- NAVIGATION                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<nav class="fixed top-0 w-full z-50" style="background: rgba(251, 247, 242, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2.5">
+      <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="none" stroke="var(--primary)" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="9" fill="none" stroke="var(--primary)" stroke-width="0.8"/>
+        <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+        <line x1="16" y1="1" x2="16" y2="5" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="16" y1="27" x2="16" y2="31" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="1" y1="16" x2="5" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="27" y1="16" x2="31" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+      </svg>
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-display text-xl font-medium" style="color: var(--primary);">Hayuna</span>
+        <span class="text-[10px] font-mono uppercase tracking-widest" style="color: var(--muted);">AI</span>
+      </div>
+    </a>
+
+    <div class="hidden md:flex items-center gap-9 text-sm" style="color: var(--text);">
+      <a href="index.html" class="nav-link">Beranda</a>
+      <a href="index.html#tim" class="nav-link">Tim AI</a>
+      <a href="#anatomi" class="nav-link">Anatomi</a>
+      <a href="#bukti" class="nav-link">Bukti</a>
+      <a href="#cara-kerja" class="nav-link">Cara Kerja</a>
+      <a href="bos-alung.html" class="nav-link">Bos Alung</a>
+    </div>
+
+    <button id="burger" class="md:hidden p-2" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text);">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0" style="background: var(--sand); border-bottom: 1px solid var(--border);">
+    <div class="flex flex-col p-6 gap-5 text-base">
+      <a href="index.html" class="mobile-link" style="color: var(--text);">← Beranda</a>
+      <a href="index.html#tim" class="mobile-link" style="color: var(--text);">Tim AI</a>
+      <a href="#anatomi" class="mobile-link" style="color: var(--text);">Anatomi Budi</a>
+      <a href="#bukti" class="mobile-link" style="color: var(--text);">Bukti — LFT</a>
+      <a href="#cara-kerja" class="mobile-link" style="color: var(--text);">Cara Kerja</a>
+      <a href="bos-alung.html" class="mobile-link" style="color: var(--text);">Bos Alung →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HERO                                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-5 sm:px-8 overflow-hidden" style="background: var(--sand);">
+  <div class="grain"></div>
+
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="hero-stagger">
+      <!-- Breadcrumb -->
+      <div class="mb-8">
+        <a href="index.html" class="text-[11px] font-mono uppercase tracking-[0.2em] hover:opacity-100 opacity-70 transition inline-flex items-center gap-2" style="color: var(--primary);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Hayuna AI · Tim AI · Budi
+        </a>
+      </div>
+
+      <!-- Status badge -->
+      <div class="mb-8">
+        <span class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full" style="background: rgba(115, 165, 128, 0.15); color: var(--sage);">
+          <span class="w-2 h-2 rounded-full status-dot" style="background: var(--sage);"></span>
+          LIVE PRODUCTION
+        </span>
+      </div>
+
+      <!-- Wordmark + role -->
+      <div class="mb-8">
+        <h1 class="font-display text-7xl sm:text-9xl font-medium leading-none mb-4" style="color: var(--primary);">Budi</h1>
+        <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.25em]" style="color: var(--terracotta);">
+          Stok &amp; Gudang Manager AI
+        </p>
+      </div>
+
+      <!-- Sub-headline -->
+      <p class="text-lg sm:text-2xl max-w-3xl leading-relaxed mb-8" style="color: var(--text);">
+        Penerimaan barang, opname, dan pengeluaran via Telegram dalam bahasa Indonesia natural. Tiga sub-specialist anti-fraud yang <span class="font-display italic" style="color: var(--terracotta);">tidak bisa kongkalikong</span>.
+      </p>
+
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-x-10 gap-y-4 mt-12">
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Transaksi</p>
+          <p class="font-display text-3xl font-medium" style="color: var(--primary);">329<span class="text-sm font-mono ml-1" style="color: var(--muted);">+</span></p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Reliability</p>
+          <p class="font-display text-3xl font-medium" style="color: var(--primary);">100<span class="text-sm font-mono" style="color: var(--muted);">%</span></p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Anchor Klien</p>
+          <p class="font-display text-3xl font-medium" style="color: var(--primary);">LFT</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Channel</p>
+          <p class="font-display text-3xl font-medium" style="color: var(--primary);">Telegram</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- POSITIONING dalam tim                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-20 sm:py-28 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-5 gap-12 items-start">
+      <div class="md:col-span-2 reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+          01 / Posisi
+        </p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight" style="color: var(--primary);">
+          Budi adalah anggota tim Anda.
+        </h2>
+      </div>
+
+      <div class="md:col-span-3 reveal reveal-delay-1 space-y-5 text-base leading-relaxed" style="color: var(--text);">
+        <p>
+          Dalam org chart Hayuna AI, Budi adalah <strong style="color: var(--primary);">specialist Stok &amp; Gudang</strong> yang report langsung ke <a href="index.html#tim" class="font-display italic underline decoration-1 underline-offset-4" style="color: var(--terracotta);">Bos Hayuna</a>. Anda tidak chat ke Budi langsung — Anda chat ke Bos Hayuna, dan Bos Hayuna yang routing ke Budi kalau topiknya tentang stok.
+        </p>
+        <p>
+          Untuk operasional harian seperti penerimaan barang dari supplier atau stock opname, staff Anda bisa langsung interact dengan Budi via grup Telegram khusus. Budi terima pesan natural — <em>"Pak, 5kg ayam masuk dari supplier Pak Andi"</em> — parse otomatis, validasi, dan catat ke Sheets.
+        </p>
+        <p>
+          Budi juga cross-flow ke <strong style="color: var(--primary);">Wulan</strong> (Finance) untuk price tracking dan HPP calculation. Stok keluar produksi → Wulan menghitung cost. Real-time, audit-ready.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ANATOMI — 3 Sub-Specialist                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="anatomi" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="reveal text-center mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        02 / Anatomi
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Tiga specialist.<br>Satu Budi.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: var(--text);">
+        Di belakang Budi, ada tiga sub-specialist AI yang bekerja independen — masing-masing menangani satu domain, masing-masing punya audit trail terpisah. Mereka <span class="font-display italic" style="color: var(--terracotta);">tidak bisa kongkalikong</span>.
+      </p>
+    </div>
+
+    <!-- Anti-fraud explanation -->
+    <div class="reveal reveal-delay-1 p-6 sm:p-8 rounded-2xl mb-12" style="background: var(--primary); color: var(--sand);">
+      <div class="flex flex-col md:flex-row md:items-center gap-6">
+        <div class="flex-shrink-0">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta-light);">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta-light);">
+            Kenapa Tiga, Bukan Satu
+          </p>
+          <h3 class="font-display text-2xl sm:text-3xl font-medium mb-3">Anti-fraud structural — bukan inherent.</h3>
+          <p class="text-sm sm:text-base leading-relaxed" style="color: rgba(251, 247, 242, 0.85);">
+            Di F&amp;B profesional, tidak ada perusahaan yang membiarkan satu orang menghandle penerimaan + opname + pengeluaran. Fraud probability hampir 100%. UMKM Indonesia tidak punya budget untuk tiga staf + supervisor. Budi menyelesaikan ini secara arsitektural: tiga specialist AI, tiga audit trail independent, cross-verification otomatis.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 specialist cards -->
+    <div class="grid md:grid-cols-3 gap-5">
+
+      <!-- Specialist 1: Penerima -->
+      <div class="specialist-card p-7 rounded-2xl reveal reveal-delay-1" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-6">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(115, 165, 128, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage);">
+              <polyline points="3 17 9 11 13 15 21 7"/>
+              <polyline points="14 7 21 7 21 14"/>
+            </svg>
+          </div>
+          <span class="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded" style="background: rgba(115, 165, 128, 0.12); color: var(--sage);">SPECIALIST 01</span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Penerima Barang</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">Incoming Inventory</p>
+        <p class="text-sm leading-relaxed mb-5" style="color: var(--text);">
+          Menerima pesan staff bahasa natural saat barang datang dari supplier. Verifikasi qty, unit, harga, supplier — semua tercatat dengan timestamp dan staff ID.
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--sage);">+</span>
+            Audit penerimaan trail independent
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--sage);">+</span>
+            Konfirmasi sebelum auto-add item baru
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--sage);">+</span>
+            Anomaly detection untuk qty outlier
+          </li>
+        </ul>
+      </div>
+
+      <!-- Specialist 2: Opname -->
+      <div class="specialist-card p-7 rounded-2xl reveal reveal-delay-2" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-6">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(15, 76, 92, 0.10);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary);">
+              <rect x="9" y="2" width="6" height="4" rx="1"/>
+              <path d="M9 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="15" y2="16"/>
+            </svg>
+          </div>
+          <span class="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded" style="background: rgba(15, 76, 92, 0.10); color: var(--primary);">SPECIALIST 02</span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Pengelola Opname</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">Stock Verification</p>
+        <p class="text-sm leading-relaxed mb-5" style="color: var(--text);">
+          Stock count verification. Saat opname rutin, Budi compare fisik vs sistem. Selisih besar wajib disertai alasan terkategorisasi — rusak, hilang, salah catat, opname rutin, atau lainnya.
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--primary);">+</span>
+            Discrepancy analysis per item
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--primary);">+</span>
+            Selisih reasoning enforcement
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--primary);">+</span>
+            Bulk konfirmasi untuk 10+ item
+          </li>
+        </ul>
+      </div>
+
+      <!-- Specialist 3: Pengeluaran -->
+      <div class="specialist-card p-7 rounded-2xl reveal reveal-delay-3" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-6">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(212, 130, 58, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta);">
+              <line x1="22" y1="12" x2="2" y2="12"/>
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+            </svg>
+          </div>
+          <span class="font-mono text-[10px] uppercase tracking-wider px-2 py-1 rounded" style="background: rgba(212, 130, 58, 0.12); color: var(--terracotta);">SPECIALIST 03</span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Pengelola Pengeluaran</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">Outgoing Inventory</p>
+        <p class="text-sm leading-relaxed mb-5" style="color: var(--text);">
+          Track outgoing inventory — produksi, transfer ke outlet, internal use. Setiap pengeluaran wajib disertai destination dan staff handler. Cross-flow ke Wulan untuk costing.
+        </p>
+        <ul class="space-y-2 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--terracotta);">+</span>
+            Production allocation tracking
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--terracotta);">+</span>
+            Internal transfer audit
+          </li>
+          <li class="flex gap-2">
+            <span class="font-mono" style="color: var(--terracotta);">+</span>
+            HPP feed ke Wulan real-time
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Quote -->
+    <p class="font-display italic text-lg sm:text-xl text-center max-w-3xl mx-auto mt-12 reveal reveal-delay-4" style="color: var(--muted);">
+      "Tiga AI agent, tiga audit trail, satu zero kongkalikong."
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CARA KERJA — Chat Flow Demo                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="cara-kerja" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        03 / Cara Kerja
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Staff chat bahasa biasa.<br>Budi paham.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: var(--text);">
+        Tidak ada form. Tidak ada training panjang. Staff cukup chat di grup Telegram seperti chat ke teman. Budi yang parse, validate, dan tulis ke Sheets.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 items-start">
+
+      <!-- Chat Demo -->
+      <div class="reveal reveal-delay-1 chat-demo">
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <!-- Chat header -->
+          <div class="px-5 py-4 flex items-center gap-3" style="background: var(--primary); color: var(--sand);">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-medium" style="background: var(--terracotta); color: var(--sand);">B</div>
+            <div>
+              <p class="font-medium text-sm">Budi · Gudang LFT</p>
+              <p class="text-[11px] opacity-70 font-mono">@BudiBot_LFT · online</p>
+            </div>
+          </div>
+
+          <!-- Chat body -->
+          <div class="p-5 space-y-3 min-h-[420px]" style="background: var(--sand);">
+
+            <!-- Bubble 1: staff message -->
+            <div class="chat-bubble chat-bubble-1 flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">Pak, 5kg ayam masuk dari supplier Pak Andi tadi pagi</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">08:42</p>
+              </div>
+            </div>
+
+            <!-- Bubble 2: Budi response -->
+            <div class="chat-bubble chat-bubble-2 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Sudah dicatat Kak Anif:<br>
+                  <span class="font-mono text-xs">— Ayam: +5 kg</span><br>
+                  <span class="font-mono text-xs">— Supplier: Pak Andi</span><br>
+                  <span class="font-mono text-xs">— Stok sekarang: 23 kg</span>
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">08:42 · Penerima Specialist</p>
+              </div>
+            </div>
+
+            <!-- Bubble 3: opname trigger -->
+            <div class="chat-bubble chat-bubble-3 flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">opname pagi: ayam 23, beras 45, kecap 8 botol</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">08:55</p>
+              </div>
+            </div>
+
+            <!-- Bubble 4: Budi confirms -->
+            <div class="chat-bubble chat-bubble-4 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Selesai dicatat Kak. Dari 3 barang, 2 cocok dengan sistem.<br><br>
+                  1 item selisih, mau saya konfirmasi:<br>
+                  <span class="font-mono text-xs">— Kecap: sistem 12, fisik 8 botol</span><br><br>
+                  Balas: <em>'opname rutin'</em> atau alasan lain.
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">08:55 · Opname Specialist</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flow explanation -->
+      <div class="reveal reveal-delay-2 space-y-6">
+        <div>
+          <h3 class="font-display text-2xl font-medium mb-3" style="color: var(--primary);">Yang terjadi di belakang</h3>
+          <p class="text-sm leading-relaxed" style="color: var(--text);">
+            Setiap pesan staff masuk ke pipeline: trigger detection → LLM parse → validate → cross-check audit → write to Sheets → respond.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex gap-4 p-4 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-mono text-xs font-bold flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">01</span>
+            <div>
+              <p class="font-medium text-sm mb-1" style="color: var(--primary);">Trigger Detection</p>
+              <p class="text-xs leading-relaxed" style="color: var(--muted);">Filter kata kunci (masuk, datang, opname, keluar) — pesan random di-ignore untuk hemat resource.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 p-4 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-mono text-xs font-bold flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">02</span>
+            <div>
+              <p class="font-medium text-sm mb-1" style="color: var(--primary);">LLM Parsing</p>
+              <p class="text-xs leading-relaxed" style="color: var(--muted);">Ollama qwen3 lokal extract item, qty, unit, supplier, destination dari bahasa natural Indonesia.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 p-4 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-mono text-xs font-bold flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">03</span>
+            <div>
+              <p class="font-medium text-sm mb-1" style="color: var(--primary);">Validation &amp; Confirm</p>
+              <p class="text-xs leading-relaxed" style="color: var(--muted);">Item baru atau anomali wajib konfirmasi owner. Yang sudah terdaftar — langsung jalan.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 p-4 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-mono text-xs font-bold flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">04</span>
+            <div>
+              <p class="font-medium text-sm mb-1" style="color: var(--primary);">Write &amp; Audit</p>
+              <p class="text-xs leading-relaxed" style="color: var(--muted);">Tulis ke Google Sheets klien — Master Items, Barang Masuk, Barang Keluar, Stok Update — semua per-specialist trail.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="font-display italic text-sm pt-2" style="color: var(--muted);">
+          Owner Anda bisa buka Sheets kapan saja — semua transaksi terlihat dengan timestamp, staff ID, dan alasan kalau ada anomali.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- BUKTI — LFT Case Study Timeline                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="bukti" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">
+        04 / Bukti
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--sand);">
+        Case Study: LFT Central Kitchen.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+        LFT bukan klien biasa. Owner LFT adalah founder Hayuna AI — Ko Richard sendiri yang eat own dog food. Setiap rilis Budi diuji di dapur produksi real sebelum dibagikan ke klien lain.
+      </p>
+    </div>
+
+    <!-- Key stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16 reveal reveal-delay-1">
+      <div class="p-6 rounded-xl" style="background: var(--primary-dark);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta-light);">Transaksi</p>
+        <p class="font-display count-up text-5xl font-medium" data-count="329" style="color: var(--sand);">329</p>
+      </div>
+      <div class="p-6 rounded-xl" style="background: var(--primary-dark);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta-light);">Reliability</p>
+        <p class="font-display text-5xl font-medium" style="color: var(--sand);">100<span class="text-2xl">%</span></p>
+      </div>
+      <div class="p-6 rounded-xl" style="background: var(--primary-dark);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta-light);">Data Loss</p>
+        <p class="font-display text-5xl font-medium" style="color: var(--sand);">0</p>
+      </div>
+      <div class="p-6 rounded-xl" style="background: var(--primary-dark);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--terracotta-light);">Bug Critical</p>
+        <p class="font-display text-5xl font-medium" style="color: var(--sand);">0</p>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="reveal reveal-delay-2 max-w-3xl">
+      <p class="font-mono text-xs uppercase tracking-widest mb-8" style="color: var(--terracotta-light);">Timeline Production</p>
+
+      <div class="space-y-0">
+        <div class="timeline-marker milestone" style="border-left-color: rgba(251, 247, 242, 0.2);">
+          <p class="font-mono text-xs uppercase tracking-wider mb-1" style="color: var(--terracotta-light);">11 MEI 2026</p>
+          <h3 class="font-display text-xl font-medium mb-2" style="color: var(--sand);">Foundation Day</h3>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+            Hayuna AI brand lock. Budi v3.0 production di LFT — 329 transaksi tanpa parsing failure maupun data loss.
+          </p>
+        </div>
+
+        <div class="timeline-marker milestone" style="border-left-color: rgba(251, 247, 242, 0.2);">
+          <p class="font-mono text-xs uppercase tracking-wider mb-1" style="color: var(--terracotta-light);">13 MEI 2026</p>
+          <h3 class="font-display text-xl font-medium mb-2" style="color: var(--sand);">Phase 5 — Bulletproof</h3>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+            13 bug resolved. Conversation state machine deployed. 102 test cases pass. UX redesign untuk klien-grade interaction.
+          </p>
+        </div>
+
+        <div class="timeline-marker milestone" style="border-left-color: rgba(251, 247, 242, 0.2);">
+          <p class="font-mono text-xs uppercase tracking-wider mb-1" style="color: var(--terracotta-light);">15 MEI 2026</p>
+          <h3 class="font-display text-xl font-medium mb-2" style="color: var(--sand);">v3.1 Migration</h3>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+            Migration ke v3.1 — multi-tenant architecture, atomic bootstrap, zero downtime. Smoke test 3/3 PASS. LFT operational tidak terganggu.
+          </p>
+        </div>
+
+        <div class="timeline-marker" style="border-left-color: rgba(251, 247, 242, 0.2);">
+          <p class="font-mono text-xs uppercase tracking-wider mb-1" style="color: var(--terracotta-light);">NOW</p>
+          <h3 class="font-display text-xl font-medium mb-2" style="color: var(--sand);">Production Stable</h3>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+            Budi v3.1 melayani LFT setiap hari. Next: stress test untuk multi-tenant, dashboard owner view (Phase 6).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Founder note -->
+    <div class="reveal reveal-delay-3 mt-12 p-6 sm:p-8 rounded-xl" style="background: var(--primary-dark);">
+      <div class="flex items-start gap-4">
+        <span class="font-display italic text-5xl flex-shrink-0 leading-none" style="color: var(--terracotta-light);">"</span>
+        <div>
+          <p class="text-base sm:text-lg leading-relaxed mb-3 font-display italic" style="color: var(--sand);">
+            Saya tidak akan ship Budi ke klien lain sampai saya sendiri merasa Budi sudah cukup matang di dapur saya. Itu prinsip yang saya pegang.
+          </p>
+          <p class="text-xs font-mono uppercase tracking-wider" style="color: var(--terracotta-light);">
+            — Richard, Owner LFT &amp; Founder Hayuna AI
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- INTEGRATION 3-MODE                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-16 text-center">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        05 / Integrasi
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl mx-auto" style="color: var(--primary);">
+        Bekerja dengan sistem<br>yang sudah Anda pakai.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: var(--text);">
+        Budi tidak memaksa Anda ganti POS. Tiga mode integrasi — pilih yang paling cocok dengan kondisi bisnis Anda.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="reveal reveal-delay-1 p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-4" style="color: var(--primary);">MODE 01</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">API Integration</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Real-time sync untuk POS dengan open API. Budi pull data transaksi otomatis, match dengan stock movement.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border);">
+          <p class="text-[11px] font-mono uppercase tracking-wider mb-2" style="color: var(--muted);">Cocok untuk</p>
+          <p class="text-xs" style="color: var(--text);">Moka, Pawoon, dan POS modern dengan endpoint terbuka</p>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-4" style="color: var(--primary);">MODE 02</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Daily Report Import</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Klien export CSV/PDF dari POS, upload via Telegram. Budi parse, reconcile dengan stock movement harian.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border);">
+          <p class="text-[11px] font-mono uppercase tracking-wider mb-2" style="color: var(--muted);">Cocok untuk</p>
+          <p class="text-xs" style="color: var(--text);">ESB, ScaleOcean, POS legacy tanpa open API</p>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-4" style="color: var(--primary);">MODE 03</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Manual Capture</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Tanpa POS. Staff chat langsung — Budi extract data dari bahasa natural. Mode default untuk LFT saat ini.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border);">
+          <p class="text-[11px] font-mono uppercase tracking-wider mb-2" style="color: var(--muted);">Cocok untuk</p>
+          <p class="text-xs" style="color: var(--text);">Warung, gerobakan, central kitchen, POS sederhana</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ONBOARDING                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="grid md:grid-cols-5 gap-12 items-start">
+      <div class="md:col-span-2 reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+          06 / Onboarding
+        </p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+          15 — 30 menit.<br>Bukan berbulan.
+        </h2>
+        <p class="text-base leading-relaxed" style="color: var(--text);">
+          Bukan project implementation enterprise. Budi siap pakai dalam satu sesi singkat untuk klien yang sudah menyiapkan prerequisite.
+        </p>
+      </div>
+
+      <div class="md:col-span-3 reveal reveal-delay-1">
+        <div class="space-y-4">
+          <div class="p-5 rounded-xl flex gap-4 items-start" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-display text-2xl font-medium flex-shrink-0" style="color: var(--terracotta);">01</span>
+            <div>
+              <p class="font-medium mb-1.5" style="color: var(--primary);">Sheets blank disiapkan klien</p>
+              <p class="text-sm" style="color: var(--text);">Google Sheets baru di akun klien. Hayuna kasih template multi-tab, klien tinggal share access ke service account.</p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-xl flex gap-4 items-start" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-display text-2xl font-medium flex-shrink-0" style="color: var(--terracotta);">02</span>
+            <div>
+              <p class="font-medium mb-1.5" style="color: var(--primary);">Telegram group dibuat klien</p>
+              <p class="text-sm" style="color: var(--text);">Tiga grup minimum: Penerimaan, Pengeluaran/Opname, Developer (untuk approval anomali). Owner add bot Budi sebagai member.</p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-xl flex gap-4 items-start" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-display text-2xl font-medium flex-shrink-0" style="color: var(--terracotta);">03</span>
+            <div>
+              <p class="font-medium mb-1.5" style="color: var(--primary);">List item awal (atau zero start)</p>
+              <p class="text-sm" style="color: var(--text);">Klien bisa kasih daftar 100 item baseline F&amp;B yang Hayuna sudah siapkan, atau mulai dari nol — Budi auto-add item baru sambil jalan dengan konfirmasi owner.</p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-xl flex gap-4 items-start" style="background: var(--white); border: 1px solid var(--border);">
+            <span class="font-display text-2xl font-medium flex-shrink-0" style="color: var(--terracotta);">04</span>
+            <div>
+              <p class="font-medium mb-1.5" style="color: var(--primary);">Test transaksi bareng</p>
+              <p class="text-sm" style="color: var(--text);">Hayuna ajak staff klien test 3-5 transaksi (penerimaan, opname, pengeluaran) bersama-sama. Setelah lulus, Budi go-live di tenant tersebut.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- KAPAN TIDAK COCOK                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        07 / Honest Disclosure
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight max-w-3xl" style="color: var(--primary);">
+        Kapan Budi <em class="font-display italic">tidak</em> cocok.
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+
+      <div class="reveal reveal-delay-1 p-6 rounded-xl" style="background: var(--sand-dark);">
+        <div class="flex items-center gap-2 mb-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brick);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <p class="font-mono text-[10px] uppercase tracking-widest" style="color: var(--brick);">BUKAN UNTUK</p>
+        </div>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Warung tunggal owner-cooked</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Kalau Anda jualan sendiri tanpa staff, Budi overkill. Anda lebih efisien track stok di buku catatan atau spreadsheet sederhana.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-6 rounded-xl" style="background: var(--sand-dark);">
+        <div class="flex items-center gap-2 mb-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brick);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <p class="font-mono text-[10px] uppercase tracking-widest" style="color: var(--brick);">BUKAN UNTUK</p>
+        </div>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Enterprise 50+ outlet</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Skala enterprise butuh integration team dedicated, custom workflow, audit external. Hayuna belum punya resources untuk segment ini.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-6 rounded-xl" style="background: var(--sand-dark);">
+        <div class="flex items-center gap-2 mb-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brick);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <p class="font-mono text-[10px] uppercase tracking-widest" style="color: var(--brick);">BUKAN UNTUK</p>
+        </div>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Stok dengan SKU 5000+</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Budi optimized untuk F&amp;B dengan SKU di bawah 500 item. SKU besar (retail FMCG, supermarket) butuh arsitektur berbeda.
+        </p>
+      </div>
+    </div>
+
+    <p class="reveal reveal-delay-4 font-display italic text-base sm:text-lg text-center mt-12 max-w-2xl mx-auto" style="color: var(--muted);">
+      Kami lebih senang bilang "ini tidak cocok untuk Anda" sekarang, daripada Anda kecewa setelah onboard.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CROSS-FLOW                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">
+          08 / Cross-Flow
+        </p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--sand);">
+          Budi tidak bekerja sendiri.
+        </h2>
+        <p class="text-base leading-relaxed mb-6" style="color: rgba(251, 247, 242, 0.85);">
+          Setiap pengeluaran barang yang Budi catat akan diteruskan ke <strong style="color: var(--terracotta-light);">Wulan</strong> (Finance) untuk price tracking dan HPP calculation. Real-time costing tanpa double-entry manual.
+        </p>
+        <p class="text-base leading-relaxed" style="color: rgba(251, 247, 242, 0.85);">
+          Ketika Wulan rilis nanti (Q1 2027), klien existing Budi akan otomatis dapat upgrade integrasi — tanpa migration project tambahan.
+        </p>
+      </div>
+
+      <!-- Cross-flow visual -->
+      <div class="reveal reveal-delay-1">
+        <svg viewBox="0 0 400 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+          <!-- Budi node -->
+          <g>
+            <rect x="40" y="60" width="120" height="80" rx="8" fill="rgba(251, 247, 242, 0.1)" stroke="var(--sage)" stroke-width="2"/>
+            <text x="100" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--sand)">Budi</text>
+            <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--sage-light)" letter-spacing="1">STOK · LIVE</text>
+          </g>
+
+          <!-- Flow arrow -->
+          <line class="flow-line" x1="170" y1="100" x2="240" y2="100" stroke="var(--terracotta-light)" stroke-width="2"/>
+          <polygon points="240,100 230,95 230,105" fill="var(--terracotta-light)"/>
+
+          <text x="205" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta-light)" letter-spacing="1">HPP</text>
+          <text x="205" y="120" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta-light)" letter-spacing="1">→ DATA</text>
+
+          <!-- Wulan node -->
+          <g>
+            <rect x="250" y="60" width="120" height="80" rx="8" fill="rgba(251, 247, 242, 0.05)" stroke="rgba(251, 247, 242, 0.3)" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="310" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--sand)">Wulan</text>
+            <text x="310" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="rgba(251, 247, 242, 0.5)" letter-spacing="1">Q1 2027</text>
+          </g>
+
+          <!-- Reverse flow -->
+          <line class="flow-line" x1="240" y1="180" x2="170" y2="180" stroke="var(--terracotta-light)" stroke-width="2" opacity="0.5"/>
+          <polygon points="170,180 180,175 180,185" fill="var(--terracotta-light)" opacity="0.5"/>
+
+          <text x="205" y="200" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="rgba(251, 247, 242, 0.5)" letter-spacing="1">← PRICE UPDATE</text>
+
+          <!-- Label -->
+          <text x="200" y="40" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta-light)" letter-spacing="2">CROSS-FLOW INTEGRATION</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- BACK TO ECOSYSTEM                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-20 sm:py-28 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-3xl mx-auto text-center">
+
+    <div class="reveal">
+      <div class="divider-ornament mb-10">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--terracotta);">
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+      </div>
+
+      <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Lihat tim lengkapnya.
+      </h2>
+      <p class="text-base sm:text-lg leading-relaxed mb-10" style="color: var(--text);">
+        Budi adalah satu dari enam anggota tim AI Hayuna. Lihat bagaimana Bos Hayuna mengkoordinasi semua specialist untuk operasional Anda.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="index.html#tim" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--primary); color: var(--sand);">
+          Tim AI Hayuna
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="bos-alung.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--white); color: var(--primary); border: 1px solid var(--border);">
+          Detail Bos Alung
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer class="py-16 px-5 sm:px-8" style="background: var(--primary-dark); color: rgba(251, 247, 242, 0.6);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="var(--sand)" stroke-width="1"/>
+            <circle cx="16" cy="16" r="9" fill="none" stroke="var(--sand)" stroke-width="0.8"/>
+            <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+          </svg>
+          <span class="font-display text-lg" style="color: var(--sand);">Hayuna AI</span>
+        </div>
+        <p class="text-xs leading-relaxed">
+          Tim AI Agent untuk operasional F&B Indonesia.<br>
+          Memayu hayuning bisnis Anda.
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Modul</p>
+        <ul class="space-y-2.5 text-xs">
+          <li><a href="budi.html" class="hover:opacity-100 opacity-100 transition" style="color: var(--terracotta-light);">→ Budi — Stok &amp; Gudang</a></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Cici — Customer Service</span></li>
+          <li><a href="bos-alung.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Bos Alung — HR</a></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Bos Afung — Operasional</span></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Wulan — Finance</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Status</p>
+        <ul class="space-y-2.5 text-xs">
+          <li>Budi v3.1 — LIVE PRODUCTION</li>
+          <li>LFT Central Kitchen Anchor</li>
+          <li>Bandung, Indonesia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t text-center text-xs" style="border-color: rgba(251, 247, 242, 0.1);">
+      © 2026 Hayuna AI · <span class="font-display italic">Memayu Hayuning Bawana</span> · Dibangun di Indonesia
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ─── Mobile menu ───
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobile-menu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  document.querySelectorAll('.mobile-link').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  // ─── Reveal observer ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        if (entry.target.querySelectorAll('.count-up').length) {
+          entry.target.querySelectorAll('.count-up').forEach(animateCount);
+        }
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal, .chat-demo').forEach(el => observer.observe(el));
+
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count || el.textContent);
+    const duration = 1800;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(target * ease);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ─── Smooth scroll ───
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
