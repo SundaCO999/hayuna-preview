@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wulan — Finance + Purchasing + Accounting AI · Hayuna AI</title>
+<meta name="description" content="Wulan adalah 1 modul dengan 3 sub-agent specialist — Purchasing, Finance, dan Accounting. Pangkas beban 3 staff senior, klien cukup hire 1 data entry junior. Anti-fraud structural by design.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #0F4C5C;
+    --primary-light: #1A6B7C;
+    --primary-dark: #08323D;
+    --sand: #FBF7F2;
+    --sand-dark: #F0E9DD;
+    --terracotta: #D4823A;
+    --terracotta-light: #E89E5F;
+    --sage: #73A580;
+    --sage-light: #95C0A2;
+    --amber: #E6A817;
+    --brick: #B83A2A;
+    --text: #1A1A1A;
+    --muted: #6B6B6B;
+    --border: #E5DDD0;
+    --white: #FFFFFF;
+  }
+  * { font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--sand); color: var(--text); }
+
+  .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease-out, transform 0.9s ease-out; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  @keyframes hero-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-stagger > * { opacity: 0; animation: hero-fade-up 1s ease-out forwards; }
+  .hero-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-stagger > *:nth-child(2) { animation-delay: 0.3s; }
+  .hero-stagger > *:nth-child(3) { animation-delay: 0.5s; }
+  .hero-stagger > *:nth-child(4) { animation-delay: 0.7s; }
+  .hero-stagger > *:nth-child(5) { animation-delay: 0.9s; }
+
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--primary); transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+  .status-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  .mobile-menu { transform: translateY(-100%); transition: transform 0.3s ease; }
+  .mobile-menu.open { transform: translateY(0); }
+
+  .divider-ornament { display: flex; align-items: center; gap: 1rem; }
+  .divider-ornament::before, .divider-ornament::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @keyframes scroll-bounce { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(8px); opacity: 1; } }
+  .scroll-indicator { animation: scroll-bounce 2s ease-in-out infinite; }
+
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); }
+
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  .font-display { letter-spacing: -0.025em; }
+
+  /* Phase marker */
+  .phase-marker { position: relative; padding-left: 2rem; border-left: 2px solid var(--border); padding-bottom: 2rem; }
+  .phase-marker:last-child { padding-bottom: 0; }
+  .phase-marker::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--primary); }
+  .phase-marker.now::before { background: var(--terracotta); border-color: var(--terracotta); box-shadow: 0 0 0 4px rgba(212, 130, 58, 0.2); }
+
+  /* Cards */
+  .lift-hover { transition: all 0.3s ease; }
+  .lift-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -16px rgba(15, 76, 92, 0.15); }
+
+  .sub-agent-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .sub-agent-card:hover { transform: translateY(-3px); border-color: var(--terracotta) !important; }
+</style>
+</head>
+
+<body class="overflow-x-hidden">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50" style="background: rgba(251, 247, 242, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+    <a href="index.html" aria-label="Kembali ke beranda Hayuna AI" class="flex items-center gap-2.5 -mx-2 px-2 py-1 rounded-lg transition hover:bg-white/40 active:scale-95">
+      <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="none" stroke="var(--primary)" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="9" fill="none" stroke="var(--primary)" stroke-width="0.8"/>
+        <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+        <line x1="16" y1="1" x2="16" y2="5" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="16" y1="27" x2="16" y2="31" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="1" y1="16" x2="5" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="27" y1="16" x2="31" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+      </svg>
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-display text-xl font-medium" style="color: var(--primary);">Hayuna</span>
+        <span class="text-[10px] font-mono uppercase tracking-widest" style="color: var(--muted);">AI</span>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ml-1 opacity-60" style="color: var(--primary);" aria-hidden="true">
+        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+    </a>
+    <div class="hidden md:flex items-center gap-9 text-sm" style="color: var(--text);">
+      <a href="index.html" class="nav-link">Beranda</a>
+      <a href="index.html#tim" class="nav-link">Tim AI</a>
+      <a href="budi.html" class="nav-link">Budi</a>
+      <a href="bos-alung.html" class="nav-link">Bos Alung</a>
+      <a href="#konsep" class="nav-link">Konsep</a>
+      <a href="#math" class="nav-link">Math</a>
+      <a href="#roadmap" class="nav-link">Roadmap</a>
+    </div>
+    <button id="burger" class="md:hidden p-2" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text);">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0" style="background: var(--sand); border-bottom: 1px solid var(--border);">
+    <div class="flex flex-col p-6 gap-5 text-base">
+      <a href="index.html" class="mobile-link" style="color: var(--text);">← Beranda</a>
+      <a href="index.html#tim" class="mobile-link" style="color: var(--text);">Tim AI</a>
+      <a href="budi.html" class="mobile-link" style="color: var(--text);">Budi</a>
+      <a href="bos-alung.html" class="mobile-link" style="color: var(--text);">Bos Alung</a>
+      <a href="#konsep" class="mobile-link" style="color: var(--text);">Konsep 3 Sub-Agent</a>
+      <a href="#math" class="mobile-link" style="color: var(--text);">Replacement Math</a>
+      <a href="#roadmap" class="mobile-link" style="color: var(--text);">Roadmap</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-5 sm:px-8 overflow-hidden" style="background: var(--sand);">
+  <div class="grain"></div>
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="hero-stagger">
+      <div class="mb-8">
+        <a href="index.html" class="text-[11px] font-mono uppercase tracking-[0.2em] hover:opacity-100 opacity-70 transition inline-flex items-center gap-2" style="color: var(--primary);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Hayuna AI · Tim AI · Wulan
+        </a>
+      </div>
+
+      <div class="mb-8">
+        <span class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full" style="background: rgba(212, 130, 58, 0.15); color: var(--terracotta);">
+          <span class="w-2 h-2 rounded-full status-dot" style="background: var(--terracotta);"></span>
+          BLUEPRINT LOCKED · Q1 2027 INTEGRATED BUILD
+        </span>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="font-display text-6xl sm:text-9xl font-medium leading-none mb-4" style="color: var(--primary);">Wulan</h1>
+        <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.25em]" style="color: var(--terracotta);">Finance · Purchasing · Accounting</p>
+      </div>
+
+      <p class="text-lg sm:text-2xl max-w-3xl leading-relaxed mb-8" style="color: var(--text);">
+        Satu modul. <em class="font-display italic" style="color: var(--terracotta);">Tiga sub-agent specialist</em> yang menangani Purchasing, Finance, dan Accounting — anti-fraud structural by design. Pangkas beban operasional 3 staff senior, klien cukup hire 1 data entry junior.
+      </p>
+
+      <div class="flex flex-wrap gap-x-10 gap-y-4 mt-12">
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Sub-Agent</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">3 Specialist</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Saving Klien</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">50<span class="text-sm font-mono ml-0.5" style="color: var(--muted);">–</span>65%</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Integrated With</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">Budi v4</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Anti-Fraud</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">Structural</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 01 KONSEP — 1 Modul, 3 Sub-Agent Specialist               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="konsep" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--white);">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        01 / Konsep
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Satu modul.<br>Tiga specialist.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        UMKM Indonesia tidak mampu hire 3 orang finance terpisah. Wulan tidak meng-clone 3 software jadi 1. Wulan adalah 1 modul dengan 3 sub-agent yang punya akuntabilitas terpisah — anti-fraud bukan via segregation of humans, tapi segregation of agents.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mb-12">
+
+      <!-- PURCHASING SUB-AGENT -->
+      <div class="reveal reveal-delay-1 sub-agent-card p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-5">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background: rgba(212, 130, 58, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta);">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </div>
+          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full" style="background: rgba(212, 130, 58, 0.12); color: var(--terracotta);">
+            Sub-Agent 1
+          </span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-1.5" style="color: var(--primary);">Purchasing</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">PO · Supplier · Receiving</p>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Track supplier list (master vendor)</li>
+          <li>— Generate purchase order (PO) dari forecast Budi</li>
+          <li>— Verify invoice supplier (match PO + receiving)</li>
+          <li>— Flag anomaly: price markup, ghost vendor, volume inflasi</li>
+          <li>— Recommend optimization (volume discount, alternatif supplier)</li>
+        </ul>
+      </div>
+
+      <!-- FINANCE SUB-AGENT -->
+      <div class="reveal reveal-delay-2 sub-agent-card p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-5">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background: rgba(115, 165, 128, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage);">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full" style="background: rgba(115, 165, 128, 0.12); color: var(--sage);">
+            Sub-Agent 2
+          </span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-1.5" style="color: var(--primary);">Finance</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">Cashflow · AR · AP</p>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Cash flow tracking (in/out daily)</li>
+          <li>— Payment scheduling (AP) dengan owner approval threshold</li>
+          <li>— Receivable tracking (AR)</li>
+          <li>— Bank reconciliation</li>
+          <li>— Flag anomaly: double-payment, unusual transfer, off-book</li>
+        </ul>
+      </div>
+
+      <!-- ACCOUNTING SUB-AGENT -->
+      <div class="reveal reveal-delay-3 sub-agent-card p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-start justify-between mb-5">
+          <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background: rgba(15, 76, 92, 0.12);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary);">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full" style="background: rgba(15, 76, 92, 0.12); color: var(--primary);">
+            Sub-Agent 3
+          </span>
+        </div>
+        <h3 class="font-display text-2xl font-medium mb-1.5" style="color: var(--primary);">Accounting</h3>
+        <p class="text-[11px] font-mono uppercase tracking-wider mb-4" style="color: var(--muted);">Journal · COGS · P&amp;L</p>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Transaction categorization (chart of accounts)</li>
+          <li>— Journal entry generation</li>
+          <li>— Monthly close end-to-end</li>
+          <li>— P&amp;L + Cash Flow + Balance Sheet generation</li>
+          <li>— COGS calculation (integrated dengan recipe Budi)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ORCHESTRATOR CARD -->
+    <div class="reveal reveal-delay-4 p-8 rounded-2xl" style="background: var(--primary); color: var(--sand);">
+      <div class="grid md:grid-cols-5 gap-8 items-center">
+        <div class="md:col-span-3">
+          <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+            Wulan Orchestrator
+          </p>
+          <h3 class="font-display text-2xl font-medium mb-3" style="color: var(--sand);">
+            Top-level coordinator
+          </h3>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.85);">
+            Tiga sub-agent tidak bekerja silo. Wulan orchestrator coordinate 3 specialist, manage cross-check audit trail, escalate material decisions ke owner, dan synthesize laporan untuk Bos Hayuna sebagai entry point owner.
+          </p>
+        </div>
+        <div class="md:col-span-2">
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: var(--terracotta-light);"></span>
+              <span style="color: rgba(251, 247, 242, 0.85);">Cross-check anti-fraud matrix</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: var(--terracotta-light);"></span>
+              <span style="color: rgba(251, 247, 242, 0.85);">Material escalation ke owner</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: var(--terracotta-light);"></span>
+              <span style="color: rgba(251, 247, 242, 0.85);">Audit trail immutable</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: var(--terracotta-light);"></span>
+              <span style="color: rgba(251, 247, 242, 0.85);">Sintesis ke Bos Hayuna</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 02 REPLACEMENT MATH                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="math" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        02 / Replacement Math
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Pangkas 3 staff senior.<br>Tetap butuh 1 data entry.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        UMKM F&amp;B Indonesia banyak transaksi yang masih manual — nota fisik, pembelian cash, supplier yang belum bisa kasih invoice digital. Wulan tidak menggantikan mata manusia untuk capture. Tapi 1 orang junior, bukan 3 orang senior.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--muted);">
+          Tanpa Hayuna — Tier UMKM Menengah
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-5" style="color: var(--primary);">
+          3 staff senior dedicated
+        </h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between py-2 border-b" style="border-color: var(--border);">
+            <span style="color: var(--text);">Admin Finance</span>
+            <span class="font-mono" style="color: var(--text);">Rp 4–5 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: var(--border);">
+            <span style="color: var(--text);">Admin Purchasing</span>
+            <span class="font-mono" style="color: var(--text);">Rp 3.5–5 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: var(--border);">
+            <span style="color: var(--text);">Staff Accounting</span>
+            <span class="font-mono" style="color: var(--text);">Rp 4–6 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: var(--border);">
+            <span class="text-xs" style="color: var(--muted);">+ BPJS, tunjangan, tools</span>
+            <span class="font-mono text-xs" style="color: var(--muted);">Rp 2.5–7 jt</span>
+          </div>
+          <div class="flex justify-between pt-3 font-medium">
+            <span style="color: var(--primary);">Total / bulan</span>
+            <span class="font-display text-xl" style="color: var(--brick);">Rp 14–23 jt</span>
+          </div>
+        </div>
+        <p class="text-xs mt-5 italic" style="color: var(--muted);">
+          Plus risiko fraud — staff finance gaji 3-5 jt biasanya kurang pengalaman atau pengawasan tidak ada segregation of duties.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl" style="background: var(--primary); color: var(--sand);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Dengan Hayuna — Wulan Module
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-5" style="color: var(--sand);">
+          1 data entry + AI agent
+        </h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between py-2 border-b" style="border-color: rgba(251, 247, 242, 0.15);">
+            <span style="color: rgba(251, 247, 242, 0.85);">1 Data Entry Junior</span>
+            <span class="font-mono" style="color: rgba(251, 247, 242, 0.85);">Rp 2.5–3.5 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: rgba(251, 247, 242, 0.15);">
+            <span style="color: rgba(251, 247, 242, 0.85);">Wulan subscription</span>
+            <span class="font-mono" style="color: rgba(251, 247, 242, 0.85);">~Rp 4–7 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: rgba(251, 247, 242, 0.15);">
+            <span class="text-xs" style="color: rgba(251, 247, 242, 0.5);">BPJS junior + minor tools</span>
+            <span class="font-mono text-xs" style="color: rgba(251, 247, 242, 0.5);">Rp 0.5–1 jt</span>
+          </div>
+          <div class="flex justify-between py-2 border-b" style="border-color: rgba(251, 247, 242, 0.15);">
+            <span class="text-xs" style="color: rgba(251, 247, 242, 0.5);">Anti-fraud built-in</span>
+            <span class="font-mono text-xs" style="color: var(--sage-light);">✓ included</span>
+          </div>
+          <div class="flex justify-between pt-3 font-medium">
+            <span style="color: var(--terracotta-light);">Total / bulan</span>
+            <span class="font-display text-xl" style="color: var(--sand);">Rp 7–11 jt</span>
+          </div>
+        </div>
+        <p class="text-xs mt-5 italic" style="color: var(--terracotta-light);">
+          Saving 50–65% + agent dengan accountability terpisah (segregation of agents) by design.
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-3 p-6 sm:p-8 rounded-xl" style="background: rgba(115, 165, 128, 0.1); border: 1px solid rgba(115, 165, 128, 0.25);">
+      <div class="flex items-start gap-4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="flex-shrink-0 mt-0.5" style="color: var(--sage);">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        <div>
+          <p class="text-sm leading-relaxed" style="color: var(--text);">
+            <span class="font-display italic" style="color: var(--sage);">Tier menengah ke besar:</span> UMKM F&amp;B 3–10 outlet biasanya hire 2–3 admin finance/purchasing/accounting. Saving Wulan range Rp 7–14 juta/bulan, plus reduce hidden cost dari fraud yang biasa tidak terdeteksi sampai audit tahunan.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 03 ANTI-FRAUD STRUCTURAL                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary-dark); color: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-16 text-center">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">
+        03 / Anti-Fraud
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl mx-auto" style="color: var(--sand);">
+        AI tidak punya<br>saudara supplier.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+        Industri besar wajib pisahkan 3 orang: authorize → record → custody. UMKM tidak mampu hire 3 orang. Tapi 1 orang handle semua = fraud probability tinggi. Hayuna pecahkan dengan segregation of agents — bukan segregation of humans.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mb-12">
+      <div class="reveal reveal-delay-1 p-6 rounded-2xl" style="background: var(--primary);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Tidak punya
+        </p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--sand);">
+          Rekening pribadi
+        </h3>
+        <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          AI agent tidak punya akun bank sendiri yang bisa disetori uang klien diam-diam. Setiap pembayaran ter-log ke rekening klien yang traceable.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-6 rounded-2xl" style="background: var(--primary);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Tidak punya
+        </p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--sand);">
+          Saudara supplier
+        </h3>
+        <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          AI agent tidak ada motivasi pribadi kasih PO ke supplier yang kerabat. Ghost vendor, kickback, dan markup price terdeteksi via pattern analysis.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-6 rounded-2xl" style="background: var(--primary);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Tidak bisa
+        </p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--sand);">
+          Kongkalikong sendiri
+        </h3>
+        <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          3 sub-agent punya scope terpisah. Purchasing tidak boleh approve payment-nya sendiri — Finance verify dulu. Accounting cross-check via audit trail immutable.
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4 p-6 sm:p-8 rounded-xl" style="background: rgba(212, 130, 58, 0.12); border: 1px solid rgba(212, 130, 58, 0.25);">
+      <p class="text-sm leading-relaxed italic font-display text-center" style="color: var(--terracotta-light);">
+        "Setiap action ter-audit immutable. Itu yang traditional staff tidak bisa kasih, terlepas dari berapa pun gaji yang Anda bayar."
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 04 INTEGRATION FLOW                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--white);">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        04 / Integration
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Wulan tidak<br>berdiri sendiri.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        Wulan jadi pusat aliran data finansial ekosistem Hayuna. Cross-flow dengan Budi (COGS real-time), Bos Alung (payroll), Cici (AR), dan eskalasi ke Bos Hayuna untuk owner.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5 mb-8">
+
+      <!-- Budi -->
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(115, 165, 128, 0.15);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage);">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-medium" style="color: var(--primary);">Wulan ↔ Budi</h3>
+            <p class="text-[11px] font-mono uppercase tracking-wider" style="color: var(--muted);">Stock-to-Finance flow</p>
+          </div>
+        </div>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Budi transaction (penerimaan + pengeluaran) → otomatis feed ke Wulan accounting journal</li>
+          <li>— Budi master items + recipe → COGS calculation Wulan accurate</li>
+          <li>— Budi anomaly opname → Wulan audit cross-reference fraud detection</li>
+          <li>— Shared DB (D048) — Phase 1 schema, Phase 2+ event-driven</li>
+        </ul>
+      </div>
+
+      <!-- Bos Alung -->
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(212, 130, 58, 0.15);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta);">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-medium" style="color: var(--primary);">Wulan ↔ Bos Alung</h3>
+            <p class="text-[11px] font-mono uppercase tracking-wider" style="color: var(--muted);">HR-to-Payroll flow</p>
+          </div>
+        </div>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Bos Alung staff data + attendance → Wulan payroll journal</li>
+          <li>— Auto-calculate PPh 21 + BPJS Kesehatan + BPJS Ketenagakerjaan</li>
+          <li>— Labor cost allocation per outlet untuk margin analysis</li>
+          <li>— Eskalasi material payroll change ke owner approval</li>
+        </ul>
+      </div>
+
+      <!-- Cici -->
+      <div class="reveal reveal-delay-3 p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(230, 168, 23, 0.15);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--amber);">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-medium" style="color: var(--primary);">Wulan ↔ Cici</h3>
+            <p class="text-[11px] font-mono uppercase tracking-wider" style="color: var(--muted);">Customer-to-AR flow</p>
+          </div>
+        </div>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Cici customer transaction (kalau handle ordering) → Wulan AR</li>
+          <li>— Complaint refund cost → Wulan expense tracking</li>
+          <li>— Customer payment reconciliation</li>
+          <li>— Cross-check revenue Cici vs cash deposit outlet</li>
+        </ul>
+      </div>
+
+      <!-- Bos Hayuna -->
+      <div class="reveal reveal-delay-4 p-7 rounded-2xl" style="background: var(--primary); color: var(--sand);">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(251, 247, 242, 0.15);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta-light);">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-medium" style="color: var(--sand);">Wulan → Bos Hayuna</h3>
+            <p class="text-[11px] font-mono uppercase tracking-wider" style="color: var(--terracotta-light);">Material Escalation</p>
+          </div>
+        </div>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: rgba(251, 247, 242, 0.85);">
+          <li>— Material decisions → escalate ke owner via Bos Hayuna</li>
+          <li>— Yes/no approval untuk transaksi besar di dashboard</li>
+          <li>— Kompleks reasoning → chat dengan Bos Hayuna</li>
+          <li>— Owner daily/monthly financial summary</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 05 TAX POSITION                                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        05 / Tax Position
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Wulan kasih draft.<br>Akuntan validate &amp; submit.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        Perpajakan Indonesia rumit — PPh 21, PPh 23, PPN, SAK EMKM. Hayuna bukan tax authority. Wulan generate draft + insight, akuntan profesional klien validate &amp; submit. Match Pilot.com pattern: AI handle 80% bookkeeping, akuntan handle 20% tax compliance.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5">
+
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--sage);">
+          Wulan handle
+        </p>
+        <h3 class="font-display text-xl font-medium mb-4" style="color: var(--primary);">
+          80% — Operational
+        </h3>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>+ Generate draft PPh 21 monthly (dari payroll Bos Alung)</li>
+          <li>+ Calculate PPN keluaran dari sales</li>
+          <li>+ Track PPN masukan dari purchasing</li>
+          <li>+ Draft laporan SAK EMKM</li>
+          <li>+ Industry benchmark compliance check</li>
+          <li>+ Audit trail ready-to-submit</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl" style="background: var(--sand-dark); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta);">
+          Akuntan klien handle
+        </p>
+        <h3 class="font-display text-xl font-medium mb-4" style="color: var(--primary);">
+          20% — Compliance &amp; Submission
+        </h3>
+        <ul class="text-sm leading-relaxed space-y-2" style="color: var(--text);">
+          <li>— Final review draft Wulan</li>
+          <li>— Validate dengan regulasi terkini</li>
+          <li>— Submit ke DJP via e-Faktur / Coretax</li>
+          <li>— Handle audit pajak kalau ada</li>
+          <li>— Optimisasi pajak strategic</li>
+          <li>— Sign-off legal responsibility</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-3 mt-8 p-6 sm:p-8 rounded-xl" style="background: rgba(212, 130, 58, 0.08); border: 1px solid rgba(212, 130, 58, 0.2);">
+      <div class="flex items-start gap-4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="flex-shrink-0 mt-0.5" style="color: var(--terracotta);">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div>
+          <p class="text-sm leading-relaxed" style="color: var(--text);">
+            <span class="font-display italic" style="color: var(--terracotta);">Honest:</span> Hayuna tidak menggantikan akuntan klien. Justru sebaliknya — Wulan kasih akuntan klien data yang clean, terkategorisasi, audit-ready. Akuntan kerjanya 5x lebih cepat. Klien tetap bayar akuntan, tapi nilainya shift dari "kerja teknis" ke "advisory strategic".
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 06 ARCHITECTURE REFERENCE                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--white);">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        06 / Architecture
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Adopt yang sudah<br>terbukti production.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        Wulan tidak invent arsitektur baru dari nol. Adopt pattern terbukti dari 2 leader agentic AI accounting global — Pilot.com dan Basis.ai — dengan disesuaikan untuk konteks F&amp;B Indonesia.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5 mb-8">
+
+      <!-- Pilot.com -->
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta);">
+          Reference 1 — Pilot.com
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-1" style="color: var(--primary);">Material Impact Escalation</h3>
+        <p class="text-xs font-mono mb-5" style="color: var(--muted);">San Francisco · 7,000+ klien SMB · AI Accountant launch Feb 2026</p>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Pilot pattern: agent auto-execute routine bookkeeping. Material judgment call → signal owner dulu sebelum lanjut. Quote founder Jessica McKellar:
+        </p>
+        <p class="text-sm leading-relaxed italic mb-5 pl-4 border-l-2" style="color: var(--text); border-color: var(--terracotta);">
+          "If there is a judgment call that could have a real material impact, it will signal that it needs a human response before moving on, as only humans can make accountable decisions."
+        </p>
+        <p class="text-[10px] font-mono uppercase tracking-wider" style="color: var(--sage);">
+          Wulan apply: ✓ Routine auto-execute · ✓ Material → owner approval
+        </p>
+      </div>
+
+      <!-- Basis.ai -->
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl" style="background: var(--sand); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta);">
+          Reference 2 — Basis.ai
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-1" style="color: var(--primary);">Long-Horizon Agents</h3>
+        <p class="text-xs font-mono mb-5" style="color: var(--muted);">NYC · $1.15B valuation · 30% top-25 US accounting firms</p>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Basis pattern: agent bekerja autonomous selama jam-jam panjang untuk workflow kompleks (bukan single-turn Q&amp;A). Goal-oriented, bukan instructional:
+        </p>
+        <p class="text-sm leading-relaxed italic mb-5 pl-4 border-l-2" style="color: var(--text); border-color: var(--terracotta);">
+          "Long-horizon agents that autonomously work on complex accounting workflows over many hours to deliver accurate results."
+        </p>
+        <p class="text-[10px] font-mono uppercase tracking-wider" style="color: var(--sage);">
+          Wulan apply: ✓ Monthly close end-to-end · ✓ Goal-oriented design
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-3 p-6 sm:p-8 rounded-xl" style="background: rgba(15, 76, 92, 0.05); border: 1px solid var(--border);">
+      <h3 class="font-display text-xl font-medium mb-4" style="color: var(--primary);">Adopt selektif. Bukan wholesale.</h3>
+      <p class="text-sm leading-relaxed" style="color: var(--text);">
+        Pilot dan Basis adalah US-market focused (US GAAP, English-only, $399–$2K/bulan). Wulan tidak port langsung — adopt arsitektur principle yang fit dengan konteks Indonesia: bahasa Indonesia natural, SAK EMKM compliance, Telegram/WhatsApp channel, integrated dengan Budi v4 stock-to-finance flow, dan pricing AaaS yang fit UMKM Indonesia tier menengah.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 07 ROADMAP                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section id="roadmap" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-4xl mx-auto">
+
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        07 / Roadmap
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        4-stage build.<br>Bukan monolith launch.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl leading-relaxed" style="color: var(--text);">
+        Wulan dibangun staged dalam 4 fase untuk mitigate complexity risk. Klien onboard stage 1 dulu, naik tier saat stage 2+ ready. Match D049 Foundation Discipline 4-criteria.
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-1">
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          STAGE 1 — Q1 2027
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Accounting MVP (Visibility + Autonomous)</h3>
+        <p class="text-sm leading-relaxed mb-3" style="color: var(--text);">
+          Read access ke Budi v4 data. Auto-categorize transaksi ke Chart of Accounts F&amp;B Indonesia. Generate P&amp;L harian/bulanan. Anomaly detection. Dashboard layer (D060 doctrine apply). Bareng Budi v4 refactor SQLite-primary.
+        </p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="text-[10px] font-mono px-2 py-1 rounded" style="background: rgba(15, 76, 92, 0.12); color: var(--primary);">CHART OF ACCOUNTS</span>
+          <span class="text-[10px] font-mono px-2 py-1 rounded" style="background: rgba(115, 165, 128, 0.12); color: var(--sage);">P&amp;L AUTO</span>
+          <span class="text-[10px] font-mono px-2 py-1 rounded" style="background: rgba(212, 130, 58, 0.12); color: var(--terracotta);">DASHBOARD LIVE</span>
+        </div>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          STAGE 2 — Q2 2027
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Purchasing Sub-Agent</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Master vendor database. PO generation dari forecast Budi. Invoice supplier verification (match PO + receiving). Anti-fraud check: markup detection, ghost vendor, volume anomaly. Foundation untuk supplier price intelligence (B001 future).
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          STAGE 3 — Q3 2027
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Finance Sub-Agent</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Cash flow tracking, AR/AP management, bank reconciliation. Payment scheduling dengan owner approval threshold. Petty cash management. Cross-check revenue vs cash deposit outlet.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          STAGE 4 — Q4 2027
+        </p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Tax Suggestion Module</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Tax draft generation (PPh 21, PPh 23, PPN UMKM). SAK EMKM compliant laporan keuangan. Partnership dengan akuntan profesional. Klien-facing klarifikasi: Wulan generate draft, akuntan klien validate &amp; submit.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 08 STATUS / HONEST                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary); color: var(--sand);">
+  <div class="max-w-4xl mx-auto">
+
+    <div class="reveal text-center mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta-light);">
+        08 / Status
+      </p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6" style="color: var(--sand);">
+        Apa adanya.
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mb-12">
+
+      <div class="reveal reveal-delay-1 p-6 rounded-2xl" style="background: var(--primary-dark);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Sudah Locked
+        </p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Blueprint Strategic</h3>
+        <p class="text-xs leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          3 sub-agent specialist locked. Replacement math locked. Anti-fraud framework locked. 4-stage roadmap locked. Adopt pattern Pilot + Basis selektif.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-6 rounded-2xl" style="background: var(--primary-dark);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Belum Dibangun
+        </p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Code Q1 2027 Target</h3>
+        <p class="text-xs leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          Wulan eksekusi dimulai Q1 2027 bareng Budi v4 refactor. Sekarang fokus Cici pilot + Web Portal MVP + Bos Alung MVP dulu.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-6 rounded-2xl" style="background: var(--primary-dark);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta-light);">
+          Anchor Pilot
+        </p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">LFT Central Kitchen</h3>
+        <p class="text-xs leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          Wulan akan eat own dog food di LFT dulu — bareng Budi v4 integrated. Klien external onboard setelah stage 1 mature.
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-4 p-6 sm:p-8 rounded-xl" style="background: rgba(212, 130, 58, 0.12); border: 1px solid rgba(212, 130, 58, 0.25);">
+      <div class="flex items-start gap-4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="flex-shrink-0 mt-0.5" style="color: var(--terracotta-light);">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div>
+          <p class="text-sm leading-relaxed" style="color: var(--sand);">
+            <span class="font-display italic" style="color: var(--terracotta-light);">Honest:</span> Wulan masih blueprint locked, belum code. Sequence locked: Cici pilot → Web Portal MVP → Bos Alung MVP → baru Wulan + Budi v4 integrated. Kami tidak menjual janji — kami menunjukkan arsitektur yang sudah dipikirkan matang.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 09 CROSS-LINK MODUL LAIN                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--terracotta);">
+        09 / Modul Lain
+      </p>
+      <h2 class="font-display text-4xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Lihat ekosistem<br>lengkap.
+      </h2>
+    </div>
+
+    <div class="reveal reveal-delay-1 grid md:grid-cols-3 gap-5">
+
+      <a href="budi.html" class="block p-6 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--sage);">● LIVE</p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Budi</h3>
+        <p class="text-sm leading-relaxed mb-3" style="color: var(--text);">
+          Stok &amp; Gudang Manager — anti-fraud structural. Cross-flow dengan Wulan untuk COGS real-time.
+        </p>
+        <p class="text-xs font-medium inline-flex items-center gap-1" style="color: var(--primary);">
+          Detail Budi
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </p>
+      </a>
+
+      <a href="cici.html" class="block p-6 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--amber);">● PILOT</p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Cici</h3>
+        <p class="text-sm leading-relaxed mb-3" style="color: var(--text);">
+          Customer Service AI — v2 v0 shipped 17 Mei 2026. Cross-flow dengan Wulan untuk AR tracking.
+        </p>
+        <p class="text-xs font-medium inline-flex items-center gap-1" style="color: var(--primary);">
+          Detail Cici
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </p>
+      </a>
+
+      <a href="bos-alung.html" class="block p-6 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-[10px] font-mono uppercase tracking-widest mb-3" style="color: var(--terracotta);">● Q3 2026</p>
+        <h3 class="font-display text-2xl font-medium mb-2" style="color: var(--primary);">Bos Alung</h3>
+        <p class="text-sm leading-relaxed mb-3" style="color: var(--text);">
+          HR Manager AI — training, profiling, scoring. Cross-flow dengan Wulan untuk payroll journal.
+        </p>
+        <p class="text-xs font-medium inline-flex items-center gap-1" style="color: var(--primary);">
+          Detail Bos Alung
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </p>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-16 px-5 sm:px-8" style="background: var(--primary-dark); color: rgba(251, 247, 242, 0.6);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="var(--sand)" stroke-width="1"/>
+            <circle cx="16" cy="16" r="9" fill="none" stroke="var(--sand)" stroke-width="0.8"/>
+            <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+          </svg>
+          <span class="font-display text-lg" style="color: var(--sand);">Hayuna AI</span>
+        </div>
+        <p class="text-xs leading-relaxed">
+          Tim AI Agent untuk operasional F&amp;B Indonesia.<br>
+          Memayu hayuning bisnis Anda.
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Modul</p>
+        <ul class="space-y-2.5 text-xs">
+          <li><a href="budi.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Budi — Stok &amp; Gudang</a></li>
+          <li><a href="cici.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Cici — Customer Service</a></li>
+          <li><a href="bos-alung.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Bos Alung — HR</a></li>
+          <li><span class="opacity-50" style="color: var(--sand);">Bos Afung — Operasional</span></li>
+          <li><a href="wulan.html" class="opacity-100 transition" style="color: var(--terracotta-light);">→ Wulan — Finance + Purchasing + Accounting</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Status</p>
+        <ul class="space-y-2.5 text-xs">
+          <li>Blueprint Locked v1.6</li>
+          <li>Code Q1 2027 Target</li>
+          <li>Integrated Build with Budi v4</li>
+          <li>Bandung, Indonesia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t text-center text-xs" style="border-color: rgba(251, 247, 242, 0.1);">
+      © 2026 Hayuna AI · <span class="font-display italic">Memayu Hayuning Bawana</span> · Dibangun di Indonesia
+    </div>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobile-menu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  document.querySelectorAll('.mobile-link').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
