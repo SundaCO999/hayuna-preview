@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bos Afung — Operasional Supervisor Digital · Hayuna AI</title>
+<meta name="description" content="Bos Afung adalah supervisor digital yang santai tapi disiplin. Daily companion karyawan F&B — absensi geo-tagging, chat operasional natural, anomaly detection. Bukan pengawas yang bikin tegang.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #0F4C5C;
+    --primary-light: #1A6B7C;
+    --primary-dark: #08323D;
+    --sand: #FBF7F2;
+    --sand-dark: #F0E9DD;
+    --terracotta: #D4823A;
+    --terracotta-light: #E89E5F;
+    --sage: #73A580;
+    --sage-light: #95C0A2;
+    --sage-dark: #5A8A66;
+    --amber: #E6A817;
+    --brick: #B83A2A;
+    --text: #1A1A1A;
+    --muted: #6B6B6B;
+    --border: #E5DDD0;
+    --white: #FFFFFF;
+  }
+  * { font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--sand); color: var(--text); }
+
+  .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease-out, transform 0.9s ease-out; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  @keyframes hero-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-stagger > * { opacity: 0; animation: hero-fade-up 1s ease-out forwards; }
+  .hero-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-stagger > *:nth-child(2) { animation-delay: 0.3s; }
+  .hero-stagger > *:nth-child(3) { animation-delay: 0.5s; }
+  .hero-stagger > *:nth-child(4) { animation-delay: 0.7s; }
+  .hero-stagger > *:nth-child(5) { animation-delay: 0.9s; }
+
+  .nav-link { position: relative; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--primary); transition: width 0.3s ease; }
+  .nav-link:hover::after { width: 100%; }
+
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+  .status-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  /* Chat bubble */
+  @keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .chat-bubble { opacity: 0; animation: bubble-in 0.5s ease-out forwards; }
+  .chat-demo.visible .chat-bubble-1 { animation-delay: 0.2s; }
+  .chat-demo.visible .chat-bubble-2 { animation-delay: 0.8s; }
+  .chat-demo.visible .chat-bubble-3 { animation-delay: 1.4s; }
+  .chat-demo.visible .chat-bubble-4 { animation-delay: 2.0s; }
+  .chat-demo.visible .chat-bubble-5 { animation-delay: 2.6s; }
+  .chat-demo:not(.visible) .chat-bubble { animation-play-state: paused; }
+
+  /* Use case step animation */
+  .use-case-step { transition: all 0.4s ease-out; opacity: 0; transform: translateX(-12px); }
+  .use-case.visible .use-case-step { opacity: 1; transform: translateX(0); }
+  .use-case.visible .step-1 { transition-delay: 0.15s; }
+  .use-case.visible .step-2 { transition-delay: 0.3s; }
+  .use-case.visible .step-3 { transition-delay: 0.45s; }
+  .use-case.visible .step-4 { transition-delay: 0.6s; }
+
+  /* Dashboard frame */
+  .dashboard-frame {
+    border: 8px solid var(--primary-dark);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -20px rgba(8, 50, 61, 0.4);
+    background: var(--sand);
+  }
+  .dashboard-frame iframe { width: 100%; height: 720px; border: 0; display: block; }
+
+  .lift-hover { transition: all 0.3s ease; }
+  .lift-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -16px rgba(15, 76, 92, 0.15); }
+
+  .mobile-menu { transform: translateY(-100%); transition: transform 0.3s ease; }
+  .mobile-menu.open { transform: translateY(0); }
+
+  .divider-ornament { display: flex; align-items: center; gap: 1rem; }
+  .divider-ornament::before, .divider-ornament::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @keyframes scroll-bounce { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(8px); opacity: 1; } }
+  .scroll-indicator { animation: scroll-bounce 2s ease-in-out infinite; }
+
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); }
+
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  .font-display { letter-spacing: -0.025em; }
+
+  /* Phase marker */
+  .phase-marker { position: relative; padding-left: 2rem; border-left: 2px solid var(--border); padding-bottom: 2rem; }
+  .phase-marker:last-child { padding-bottom: 0; }
+  .phase-marker::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--primary); }
+  .phase-marker.now::before { background: var(--sage); border-color: var(--sage); box-shadow: 0 0 0 4px rgba(115, 165, 128, 0.2); }
+
+  /* Principle card */
+  .principle-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .principle-card:hover { transform: translateY(-3px); border-color: var(--sage) !important; }
+
+  /* Geo-tag mock */
+  .geo-mock {
+    background: linear-gradient(135deg, #E8F0E5 0%, #D5E5D2 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .geo-mock::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 30% 40%, rgba(115, 165, 128, 0.15) 0%, transparent 30%),
+      radial-gradient(circle at 70% 60%, rgba(115, 165, 128, 0.1) 0%, transparent 30%);
+  }
+</style>
+</head>
+
+<body class="overflow-x-hidden">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50" style="background: rgba(251, 247, 242, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+    <a href="index.html" aria-label="Kembali ke beranda Hayuna AI" class="flex items-center gap-2.5 -mx-2 px-2 py-1 rounded-lg transition hover:bg-white/40 active:scale-95">
+      <svg width="30" height="30" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" fill="none" stroke="var(--primary)" stroke-width="1.2"/>
+        <circle cx="16" cy="16" r="9" fill="none" stroke="var(--primary)" stroke-width="0.8"/>
+        <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+        <line x1="16" y1="1" x2="16" y2="5" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="16" y1="27" x2="16" y2="31" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="1" y1="16" x2="5" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+        <line x1="27" y1="16" x2="31" y2="16" stroke="var(--primary)" stroke-width="1.2"/>
+      </svg>
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-display text-xl font-medium" style="color: var(--primary);">Hayuna</span>
+        <span class="text-[10px] font-mono uppercase tracking-widest" style="color: var(--muted);">AI</span>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ml-1 opacity-60" style="color: var(--primary);" aria-hidden="true">
+        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+    </a>
+    <div class="hidden md:flex items-center gap-9 text-sm" style="color: var(--text);">
+      <a href="index.html" class="nav-link">Beranda</a>
+      <a href="index.html#tim" class="nav-link">Tim AI</a>
+      <a href="bos-alung.html" class="nav-link">Bos Alung</a>
+      <a href="#cara-kerja" class="nav-link">Cara Kerja</a>
+      <a href="#prinsip" class="nav-link">Prinsip</a>
+      <a href="#dashboard" class="nav-link">Dashboard</a>
+    </div>
+    <button id="burger" class="md:hidden p-2" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text);">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0" style="background: var(--sand); border-bottom: 1px solid var(--border);">
+    <div class="flex flex-col p-6 gap-5 text-base">
+      <a href="index.html" class="mobile-link" style="color: var(--text);">← Beranda</a>
+      <a href="index.html#tim" class="mobile-link" style="color: var(--text);">Tim AI</a>
+      <a href="bos-alung.html" class="mobile-link" style="color: var(--text);">Bos Alung</a>
+      <a href="#cara-kerja" class="mobile-link" style="color: var(--text);">Cara Kerja</a>
+      <a href="#prinsip" class="mobile-link" style="color: var(--text);">Prinsip</a>
+      <a href="#dashboard" class="mobile-link" style="color: var(--text);">Owner Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-5 sm:px-8 overflow-hidden" style="background: var(--sand);">
+  <div class="grain"></div>
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="hero-stagger">
+      <div class="mb-8">
+        <a href="index.html" class="text-[11px] font-mono uppercase tracking-[0.2em] hover:opacity-100 opacity-70 transition inline-flex items-center gap-2" style="color: var(--primary);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Hayuna AI · Tim AI · Bos Afung
+        </a>
+      </div>
+
+      <div class="mb-8">
+        <span class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full" style="background: rgba(115, 165, 128, 0.15); color: var(--sage-dark);">
+          <span class="w-2 h-2 rounded-full" style="background: var(--sage);"></span>
+          DALAM PENGEMBANGAN · Q4 2026
+        </span>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="font-display text-6xl sm:text-9xl font-medium leading-none mb-4" style="color: var(--primary);">Bos Afung</h1>
+        <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.25em]" style="color: var(--sage-dark);">Operasional Supervisor Digital</p>
+      </div>
+
+      <p class="text-lg sm:text-2xl max-w-3xl leading-relaxed mb-8" style="color: var(--text);">
+        Teman supervisor digital yang <em class="font-display italic" style="color: var(--sage-dark);">santai tapi disiplin</em>. Daily companion karyawan F&amp;B — ngobrol kasual setiap shift, bukan interogasi. AI yang <em class="font-display italic" style="color: var(--sage-dark);">mengoptimalkan</em> pekerjaan karyawan, bukan menggantikan.
+      </p>
+
+      <div class="flex flex-wrap gap-x-10 gap-y-4 mt-12">
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Channel</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">Telegram</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Engagement</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">Daily</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Anomaly Pattern</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">7 rules</p>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-1" style="color: var(--muted);">Anchor Klien</p>
+          <p class="font-display text-2xl font-medium" style="color: var(--primary);">LFT</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator absolute bottom-8 left-1/2 -translate-x-1/2">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- KENAPA BOS AFUNG -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">01 / Masalah</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Supervisor manusia tidak bisa di semua tempat.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: var(--text);">
+        Owner F&amp;B punya 1 supervisor untuk 30 karyawan, multi-shift, multi-outlet. Operasional harian — absensi, incident, customer complaint, stok issue — terlalu banyak detail yang lolos. Sistem tradisional cuma rekam, bukan paham. Bos Afung jadi <em class="font-display italic" style="color: var(--sage-dark);">extension</em> supervisor — bukan replacement.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 reveal reveal-delay-1">
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Absensi manual ribet</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Buku absen tulis tangan, fingerprint sering rusak, app khusus mahal. Owner mau tahu siapa on-time, telat, atau bolos — harus cek manual ke supervisor.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Incident lolos report</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Customer complaint, salah pesanan, stok mendadak habis — kejadian harian yang lolos catat. Supervisor sibuk handle, lupa lapor. Pattern tidak terbaca.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Karyawan baru bingung tanya</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          "Pak, SOP nya gimana?" — tapi captain lagi sibuk. Karyawan akhirnya tebak-tebakan. Pertanyaan SOP, job desk, product knowledge harusnya bisa dijawab kapan saja.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--brick);">PAIN — Operator F&amp;B</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">App tracking bikin tegang</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Software monitoring corporate bikin karyawan merasa diawasi. Mood turun, turnover naik. F&amp;B Indonesia butuh pendekatan yang feel <em>teman supervisor</em>, bukan kamera CCTV.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARA KERJA — 2 SIDED -->
+<section id="cara-kerja" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal text-center mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">02 / Cara Kerja</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Karyawan ngobrol kasual. Owner buka dashboard.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: var(--text);">
+        Bos Afung extract operational data dari chat natural — bukan form, bukan interogasi. Karyawan rasa kayak ngobrol sama teman supervisor. Owner buka dashboard kapan butuh data.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 items-start chat-demo">
+
+      <!-- LEFT: Chat with employee -->
+      <div class="reveal reveal-delay-1">
+        <div class="mb-4">
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--sage-dark);">
+            SIDE 01 — Chat dengan Karyawan
+          </p>
+          <h3 class="font-display text-2xl font-medium" style="color: var(--primary);">Santai tapi disiplin</h3>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <!-- Chat header -->
+          <div class="px-5 py-4 flex items-center gap-3" style="background: var(--primary); color: var(--sand);">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-medium" style="background: var(--sage); color: var(--sand);">F</div>
+            <div>
+              <p class="font-medium text-sm">Bos Afung</p>
+              <p class="text-[11px] opacity-70 font-mono">@BosAfung_BOT · online</p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3 min-h-[480px]" style="background: var(--sand);">
+
+            <!-- Bos Afung casual check-in -->
+            <div class="chat-bubble chat-bubble-1 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Eh udah closing? Gimana shift lu hari ini, rame nggak?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">22:14 · End of shift</p>
+              </div>
+            </div>
+
+            <!-- Karyawan reply natural -->
+            <div class="chat-bubble chat-bubble-2 flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">Rame banget Bro, dari jam 12 udah full. Tadi sempet ada complain meja 5, salah pesanan. Captain handle langsung.</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">22:15</p>
+              </div>
+            </div>
+
+            <!-- Bos Afung follow up santai -->
+            <div class="chat-bubble chat-bubble-3 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Wah mantap. Beres kah complain-nya? Tamu jadi balik nggak?
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">22:16</p>
+              </div>
+            </div>
+
+            <!-- Karyawan inisiasi report -->
+            <div class="chat-bubble chat-bubble-4 flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">Btw Bro, stok ayam tinggal 5 kilo. Weekend besok biasanya 15 kilo. Mending gue info ke gudang sekarang?</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">22:18</p>
+              </div>
+            </div>
+
+            <!-- Bos Afung respon helpful -->
+            <div class="chat-bubble chat-bubble-5 flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Yes, langsung info ke gudang ya. Gue catat juga di system, biar tar tracked di laporan harian. Thanks udah nge-flag bro 🙏
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--muted);">22:19 · Auto-extract: stock warning</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs mt-4 italic leading-relaxed" style="color: var(--muted);">
+          Bos Afung ngobrol kayak teman — bukan supervisor yang interogatif. Data operasional (incident, stok warning, customer feedback) extract otomatis dari percakapan natural. Karyawan tidak merasa diawasi.
+        </p>
+      </div>
+
+      <!-- RIGHT: Owner dashboard -->
+      <div class="reveal reveal-delay-2">
+        <div class="mb-4">
+          <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--sage-dark);">
+            SIDE 02 — Dashboard Owner
+          </p>
+          <h3 class="font-display text-2xl font-medium" style="color: var(--primary);">Daily summary interaktif</h3>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <!-- Mock dashboard preview -->
+          <div class="px-5 py-4 flex items-center justify-between" style="background: var(--primary-dark); color: var(--sand);">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs uppercase tracking-wider">Dashboard · LFT Bintaro · Hari Ini</span>
+            </div>
+            <span class="text-[10px] font-mono opacity-60">batch 23:00</span>
+          </div>
+
+          <div class="p-5 space-y-4 min-h-[480px]" style="background: var(--white);">
+            <!-- Daily stats -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="p-3 rounded-xl" style="background: var(--sand);">
+                <p class="text-[9px] font-mono uppercase tracking-wider mb-1" style="color: var(--muted);">Present</p>
+                <p class="font-display text-2xl font-medium" style="color: var(--sage-dark);">12/12</p>
+              </div>
+              <div class="p-3 rounded-xl" style="background: var(--sand);">
+                <p class="text-[9px] font-mono uppercase tracking-wider mb-1" style="color: var(--muted);">Incidents</p>
+                <p class="font-display text-2xl font-medium" style="color: var(--primary);">3</p>
+              </div>
+              <div class="p-3 rounded-xl" style="background: var(--sand);">
+                <p class="text-[9px] font-mono uppercase tracking-wider mb-1" style="color: var(--muted);">Flags</p>
+                <p class="font-display text-2xl font-medium" style="color: var(--amber);">1</p>
+              </div>
+            </div>
+
+            <!-- Activity log -->
+            <div>
+              <p class="text-xs font-mono uppercase tracking-wider mb-3" style="color: var(--muted);">Daily Operational Log</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--sage);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Absensi semua karyawan verified — geo + foto</p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">12 karyawan present</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--amber);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Stock warning — ayam tinggal 5kg (Andi)</p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">22:19 · auto-extract chat</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg" style="background: var(--sand);">
+                  <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: var(--primary);"></span>
+                  <div class="text-xs flex-1" style="color: var(--text);">
+                    <p>Customer complaint meja 5 — resolved by Captain</p>
+                    <p class="text-[10px] mt-0.5 font-mono" style="color: var(--muted);">19:45 · sentiment: resolved positive</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Highlight -->
+            <div class="p-3 rounded-lg" style="background: rgba(115, 165, 128, 0.08); border-left: 3px solid var(--sage);">
+              <p class="text-xs font-medium mb-1" style="color: var(--sage-dark);">RINGKASAN HARI INI</p>
+              <p class="text-xs" style="color: var(--text);">Operasional smooth. 1 stock warning perlu follow up gudang. Customer sentiment positive.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs mt-4 italic leading-relaxed" style="color: var(--muted);">
+          Dashboard di-update tiap malam (batch 23:00). Owner buka kapan butuh — tidak ada alert spam. Cross-validation otomatis dengan data Bos Alung untuk anomali check.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 USE CASE -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">03 / Use Case</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight max-w-3xl" style="color: var(--primary);">
+        Tiga skenario operasional.
+      </h2>
+    </div>
+
+    <div class="space-y-12">
+
+      <!-- USE CASE 1: Absensi Geo-Tag -->
+      <div class="reveal reveal-delay-1 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(115, 165, 128, 0.12); color: var(--sage-dark);">USE CASE 01</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Absensi Geo-Tagging</h3>
+            <p class="text-sm" style="color: var(--muted);">Owner mau hapus buku absen manual. Karyawan absen via Telegram dengan location + foto. Tidak perlu fingerprint mahal atau app khusus.</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage-dark);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Masuk shift</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Karyawan share location + foto selfie via Telegram ke @BosAfung_BOT. Cukup tap 2x, no app install.</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage-dark);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Verifikasi otomatis</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Bos Afung cek: location radius 100m outlet, foto detected person, waktu vs jadwal shift. Confirm: "Absen masuk diterima!"</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage-dark);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Pulang shift</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Sama prosesnya. End-of-shift chat ringan: "Closing time! Gimana shift hari ini?"</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(115, 165, 128, 0.08);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--sage-dark);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Owner view</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Dashboard tampilkan: present/late/absent + foto gallery untuk verifikasi visual. Pattern lateness auto-detect.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USE CASE 2: Tanya Jawab SOP -->
+      <div class="reveal reveal-delay-2 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(15, 76, 92, 0.08); color: var(--primary);">USE CASE 02</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Karyawan Tanya SOP Kapan Saja</h3>
+            <p class="text-sm" style="color: var(--muted);">Eka karyawan baru, lupa procedure kalau menu habis. Captain lagi sibuk. Eka tinggal chat Bos Afung — jawaban langsung, akurat.</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--primary);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Eka tanya</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">"Bro, kalau menu Nasi Goreng habis tapi tamu udah order, gimana SOP-nya?"</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--primary);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Bos Afung jawab</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Lookup ke knowledge base LFT. Reply: "Step 1, info tamu out of stock pakai bahasa apologetic. Step 2, kasih opsi menu serupa. Step 3, kasih kompensasi minuman gratis kalau tamu kecewa."</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--primary);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Eka eksekusi</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Eka tahu apa yang harus dilakuin. Tamu di-handle dengan benar. Captain tidak terganggu.</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(15, 76, 92, 0.05);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--primary);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Pattern tracking</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Pertanyaan paling sering ditanya di-aggregate di dashboard. Owner tahu modul training mana yang perlu di-reinforce.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USE CASE 3: Anomaly Detection -->
+      <div class="reveal reveal-delay-3 use-case p-6 sm:p-10 rounded-2xl" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="flex items-start gap-4 mb-8">
+          <span class="font-mono text-sm font-medium px-3 py-1.5 rounded flex-shrink-0" style="background: rgba(184, 58, 42, 0.10); color: var(--brick);">USE CASE 03</span>
+          <div>
+            <h3 class="font-display text-2xl sm:text-3xl font-medium mb-2" style="color: var(--primary);">Anomaly Detection Cross-Validation</h3>
+            <p class="text-sm" style="color: var(--muted);">Stok bahan "habis" 3x di shift karyawan tertentu dalam sebulan. Bos Afung detect pattern, cross-validate dengan HEXACO profile dari Bos Alung.</p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="use-case-step step-1 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 01</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Daily batch detect</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Batch processor jam 23:00 scan 7 pattern anomali. Detect: "Stok hilang 3x shift Karyawan B dalam 30 hari."</p>
+          </div>
+
+          <div class="use-case-step step-2 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 02</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Cross-check Bos Alung</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Query data Bos Alung: HEXACO Honesty-Humility Karyawan B turun 15 poin dalam 3 bulan. 2 red flag answer di skenario etika.</p>
+          </div>
+
+          <div class="use-case-step step-3 p-5 rounded-xl" style="background: var(--sand);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--primary);">STEP 03</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Multi-data flag</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Flag severity HIGH ke dashboard owner. Bukan tuduhan — data konsisten dari 2 sumber independent.</p>
+          </div>
+
+          <div class="use-case-step step-4 p-5 rounded-xl" style="background: rgba(184, 58, 42, 0.06);">
+            <p class="font-mono text-xs font-medium mb-2" style="color: var(--brick);">STEP 04</p>
+            <p class="text-sm font-medium mb-2" style="color: var(--primary);">Human follow up</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text);">Owner review data, ngobrol langsung. AI cuma sinyal — keputusan tetap manusia. Anti-fraud structural by design.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 PRINSIP BOS AFUNG -->
+<section id="prinsip" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16 text-center">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-light);">04 / Prinsip</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl mx-auto" style="color: var(--sand);">
+        Santai tapi disiplin.<br>Itu filosofinya.
+      </h2>
+      <p class="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+        Karyawan tidak boleh merasa diawasi terus. AI bukan mereplace pekerjaan mereka — AI optimalkan. Bos Afung dirancang dengan 6 prinsip yang locked dari awal.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-1" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">01</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">AI = tool optimalkan, bukan replace</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Bos Afung bantu karyawan kerja lebih ringan — tidak menggantikan supervisor manusia atau membuat karyawan merasa terancam jobnya.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-1" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">02</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Tone teman, bukan supervisor formal</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Bahasa kasual, no interogasi, no "lapor jam berapa". Karyawan rasa kayak ngobrol sama teman supervisor yang asyik.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-2" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">03</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Non-intrusive chat frequency</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Maks 2-3 chat per shift (selain karyawan inisiasi). Random check-in di low-traffic hour. Tidak spam, tidak nge-push.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-2" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">04</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Privacy pribadi vs operasional</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Karyawan curhat personal? Bos Afung empati, tapi tidak record sebagai operational data. Pisahan jelas antara private dan work.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-3" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">05</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Cross-validation dengan Bos Alung</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Anomali operasional di-cross-check dengan HEXACO profile. Tidak ada 1 agent yang bisa kongkalikong sendiri. Anti-fraud structural.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card p-6 rounded-xl reveal reveal-delay-3" style="background: var(--primary-dark); border: 1px solid rgba(251, 247, 242, 0.1);">
+        <div class="flex items-start gap-4">
+          <span class="font-display text-4xl font-medium leading-none flex-shrink-0" style="color: var(--sage-light);">06</span>
+          <div>
+            <h3 class="font-display text-lg font-medium mb-2" style="color: var(--sand);">Decision tetap manusia</h3>
+            <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.7);">
+              Bos Afung kasih sinyal & data — owner yang decide. AI advisor, bukan autonomous agent. Setiap keputusan terminasi atau warning tetap kewenangan manusia.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filosofi callout -->
+    <div class="reveal reveal-delay-4 mt-12 p-6 sm:p-8 rounded-xl" style="background: var(--primary-dark);">
+      <p class="font-mono text-[10px] uppercase tracking-widest mb-3" style="color: var(--sage-light);">FILOSOFI INTI</p>
+      <p class="font-display italic text-base sm:text-lg leading-relaxed" style="color: var(--sand);">
+        "Bos Afung bukan pengawas yang bikin tegang. Bos Afung adalah teman supervisor digital yang membuat kerja karyawan lebih ringan — bukan lebih berat."
+      </p>
+      <p class="text-xs mt-4 font-mono" style="color: rgba(251, 247, 242, 0.5);">
+        Filosofi ini locked sebelum kode ditulis. Bukan retrofit, bukan PR. Setiap design decision validate ke 6 prinsip ini.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ANATOMI — 4 LAYER -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">05 / Anatomi</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight max-w-3xl" style="color: var(--primary);">
+        Empat layer di balik chat.
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+      <div class="reveal reveal-delay-1 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(115, 165, 128, 0.12);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--sage);">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">LAYER 01</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Chat Interface</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          @BosAfung_BOT di Telegram. Casual operational conversation, geo-tag absensi, karyawan-initiated queries.
+        </p>
+        <ul class="space-y-1.5 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--sage);">+</span> Tone teman, not formal</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--sage);">+</span> Max 2-3 chat/shift dari bot</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-2 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(15, 76, 92, 0.10);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary);">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">LAYER 02</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">AI Extraction</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Pull operational data dari chat natural. Sentiment, incident, customer feedback, stock warning — semua extract otomatis.
+        </p>
+        <ul class="space-y-1.5 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> No formal form/survey</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> Confidence-based logging</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-3 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(212, 130, 58, 0.12);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--terracotta);">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">LAYER 03</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Batch Processor</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Daily batch jam 23:00. Aggregate data hari ini, run 7 pattern anomaly detection, update operational score per karyawan.
+        </p>
+        <ul class="space-y-1.5 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--terracotta);">+</span> No real-time alert spam</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--terracotta);">+</span> Trend tracking 30 hari</li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-4 p-7 rounded-2xl lift-hover" style="background: var(--white); border: 1px solid var(--border);">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: rgba(15, 76, 92, 0.10);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--primary);">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="9" y1="9" x2="15" y2="9"/>
+            <line x1="9" y1="13" x2="15" y2="13"/>
+            <line x1="9" y1="17" x2="13" y2="17"/>
+          </svg>
+        </div>
+        <p class="font-mono text-[10px] uppercase tracking-wider mb-2" style="color: var(--muted);">LAYER 04</p>
+        <h3 class="font-display text-xl font-medium mb-3" style="color: var(--primary);">Dashboard</h3>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text);">
+          Interactive dashboard untuk owner. Drill-down per karyawan, anomaly highlights, daily summary. Mobile-responsive, akses via Tailscale.
+        </p>
+        <ul class="space-y-1.5 text-xs" style="color: var(--muted);">
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> On-demand explore</li>
+          <li class="flex gap-2"><span class="font-mono" style="color: var(--primary);">+</span> Tidak push notification</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ANOMALY PATTERNS -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="reveal mb-16">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">06 / Anomaly Detection</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Tujuh pattern yang di-detect.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed" style="color: var(--text);">
+        Batch processor scan 7 pattern setiap malam. Detection bukan vonis — kasih sinyal ke owner untuk follow up. Cross-validation dengan HEXACO data dari Bos Alung untuk anti-fraud structural.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 reveal reveal-delay-1">
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--sage-dark);">01</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Izin sakit pattern weekend</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Karyawan sering izin sakit hari weekend rame. Pattern detection dari attendance_log.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--amber);">SEVERITY · MEDIUM</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--sage-dark);">02</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Telat berulang, alasan beda</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">NLP detection on excuse patterns. Telat berkali-kali tapi alasan tidak konsisten.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--amber);">SEVERITY · MEDIUM</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--sage-dark);">03</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Complain customer tinggi</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Karyawan dengan pattern complain customer tinggi vs rata-rata tim.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--amber);">SEVERITY · MEDIUM</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--brick);">04</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Stok hilang di shift tertentu</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Cross-check dengan Budi inventory. Stok "habis" di shift karyawan tertentu pattern repeat.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--brick);">SEVERITY · HIGH</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--brick);">05</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Geo-tag di luar radius outlet</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Verification fail. Absensi di-tag dengan location yang bukan di outlet (radius 100m).</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--brick);">SEVERITY · HIGH</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--brick);">06</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Foto absensi suspect</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Image analysis flag foto yang bukan di outlet (background tidak match), atau foto duplikat.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--brick);">SEVERITY · HIGH</p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl flex items-start gap-4 md:col-span-2" style="background: var(--white); border: 1px solid var(--border);">
+        <span class="font-display text-3xl font-medium flex-shrink-0" style="color: var(--brick);">07</span>
+        <div>
+          <h4 class="font-display text-base font-medium mb-1" style="color: var(--primary);">Inkonsistensi laporan antar karyawan</h4>
+          <p class="text-xs leading-relaxed" style="color: var(--text);">Cross-check laporan incident yang sama dari 2+ karyawan. Pattern berbeda signifikan = flag untuk investigasi.</p>
+          <p class="text-[10px] font-mono mt-2" style="color: var(--brick);">SEVERITY · HIGH</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GEO-TAGGING ABSENSI -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">07 / Absensi</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+          Absensi via Telegram.<br>Bukan app khusus.
+        </h2>
+        <p class="text-base leading-relaxed mb-4" style="color: var(--text);">
+          Karyawan share location + foto selfie via Telegram. <em class="font-display italic" style="color: var(--sage-dark);">Two-tap</em> — done. Tidak perlu install app baru, tidak perlu fingerprint mahal.
+        </p>
+        <p class="text-base leading-relaxed mb-4" style="color: var(--text);">
+          Bos Afung verify: location dalam radius 100m outlet, foto detected as person, waktu sesuai jadwal shift. Foto auto-delete setelah 90 hari (privacy).
+        </p>
+        <ul class="space-y-2 text-sm mt-6" style="color: var(--text);">
+          <li class="flex items-start gap-2">
+            <span style="color: var(--sage);">✓</span>
+            <span>Zero app install — pakai Telegram yang udah ada</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--sage);">✓</span>
+            <span>Geo + foto = sulit di-cheat</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--sage);">✓</span>
+            <span>Owner lihat foto gallery untuk visual verifikasi</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--sage);">✓</span>
+            <span>Pattern lateness auto-detect, no manual analysis</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <div class="rounded-2xl overflow-hidden" style="background: var(--white); border: 1px solid var(--border); box-shadow: 0 20px 40px -20px rgba(15, 76, 92, 0.15);">
+          <div class="px-5 py-4 flex items-center gap-3" style="background: var(--primary); color: var(--sand);">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-medium" style="background: var(--sage); color: var(--sand);">F</div>
+            <div>
+              <p class="font-medium text-sm">Bos Afung</p>
+              <p class="text-[11px] opacity-70 font-mono">absensi flow</p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3" style="background: var(--sand);">
+            <div class="flex justify-end">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-md" style="background: var(--primary); color: var(--sand);">
+                <p class="text-sm">Masuk shift Bro 🙏</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right">08:55</p>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <div class="max-w-[85%] geo-mock rounded-2xl rounded-br-md p-3 relative" style="border: 1px solid var(--border);">
+                <div class="flex items-center gap-2 mb-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--sage-dark);">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <p class="text-xs font-mono" style="color: var(--sage-dark);">Live Location</p>
+                </div>
+                <p class="text-[10px] font-mono" style="color: var(--muted);">LFT Bintaro Plaza</p>
+                <p class="text-[10px] font-mono" style="color: var(--muted);">-6.2756, 106.7546</p>
+                <p class="text-[10px] mt-1 opacity-60 font-mono text-right" style="color: var(--muted);">08:55</p>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <div class="max-w-[85%] rounded-2xl rounded-br-md overflow-hidden" style="background: var(--primary); color: var(--sand);">
+                <div class="aspect-square flex items-center justify-center" style="background: linear-gradient(135deg, #08323D 0%, #1A6B7C 100%); min-height: 120px;">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: rgba(251, 247, 242, 0.4);">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <div class="px-3 py-2">
+                  <p class="text-[10px] font-mono opacity-60">selfie · 08:55</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-start">
+              <div class="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-bl-md" style="background: var(--white); border: 1px solid var(--border);">
+                <p class="text-sm" style="color: var(--text);">
+                  Absen masuk diterima! ✅ Semangat shift-nya bro 🙏
+                </p>
+                <p class="text-[10px] mt-1 font-mono" style="color: var(--sage-dark);">08:56 · ✓ Location verified · ✓ Photo verified · ✓ On time</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD EMBED -->
+<section id="dashboard" class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-6xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">08 / Owner Dashboard</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Dashboard operasional.
+      </h2>
+      <p class="text-base sm:text-lg max-w-3xl leading-relaxed mb-2" style="color: var(--text);">
+        Interactive dashboard untuk owner. Daily summary, attendance log dengan foto verifikasi, operational score per karyawan, anomaly flags. Mobile-responsive.
+      </p>
+      <p class="text-xs font-mono uppercase tracking-wider" style="color: var(--sage-dark);">
+        ⚠ MOCKUP · Kode belum aktif · Q4 2026 development target
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-1 dashboard-frame">
+      <iframe src="bos-afung-dashboard.html" title="Bos Afung Dashboard Mockup" loading="lazy"></iframe>
+    </div>
+
+    <div class="reveal reveal-delay-2 mt-8 grid sm:grid-cols-2 gap-4">
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--sage-dark);">FUNGSI 01</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Daily snapshot</strong> — Owner buka dashboard, lihat ringkasan hari ini: attendance, incidents, customer feedback, sentiment.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--sage-dark);">FUNGSI 02</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Anomaly flags</strong> — 7 pattern detection auto-flag. Owner review severity HIGH untuk follow up.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--sage-dark);">FUNGSI 03</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Operational score per karyawan</strong> — Attendance + reliability + customer satisfaction + incidents jadi composite operational score.
+        </p>
+      </div>
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="text-xs font-mono uppercase tracking-wider mb-2" style="color: var(--sage-dark);">FUNGSI 04</p>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          <strong style="color: var(--primary);">Foto absensi gallery</strong> — Visual verification untuk owner. Lihat siapa absen di outlet, kapan, dengan foto.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--primary-dark);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-5 gap-12 items-start">
+      <div class="md:col-span-2 reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-light);">09 / Privacy</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--sand);">
+          Data operasional sensitif.
+        </h2>
+        <p class="text-base leading-relaxed" style="color: rgba(251, 247, 242, 0.75);">
+          Foto absensi, geo-coordinate, chat operasional — semua data sensitif. Privacy enforcement, bukan janji marketing.
+        </p>
+      </div>
+
+      <div class="md:col-span-3 reveal reveal-delay-1 space-y-4">
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(115, 165, 128, 0.2); color: var(--sage-light);">PRIVATE vs WORK</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Curhat personal tidak di-record</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Karyawan share masalah pribadi? Bos Afung empati, respond suportif, tapi tidak log sebagai operational data. Pisahan jelas antara obrolan personal dan operasional.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(212, 130, 58, 0.2); color: var(--terracotta-light);">AUTO-DELETE</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Foto absensi 90 hari retention</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Foto absensi auto-delete setelah 90 hari. Geo-coordinate disimpan dengan resolusi outlet-level (verified/not), bukan exact location after batch processing.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl" style="background: var(--primary);">
+          <div class="flex items-start gap-3 mb-2">
+            <span class="font-mono text-xs px-2 py-1 rounded" style="background: rgba(15, 76, 92, 0.4); color: var(--sand);">AUDIT LOG</span>
+            <h3 class="font-display text-lg font-medium" style="color: var(--sand);">Setiap akses tercatat</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color: rgba(251, 247, 242, 0.8);">
+            Owner buka data siapa, jam berapa, di-log. Developer akses untuk maintenance di-log. Tidak ada akses silent ke data karyawan.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CROSS-FLOW dengan Bos Alung -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-5xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="reveal">
+        <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">10 / Cross-Flow</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+          Bos Afung ↔ Bos Alung.
+        </h2>
+        <p class="text-base leading-relaxed mb-4" style="color: var(--text);">
+          Dua agent independent dengan database masing-masing. <strong style="color: var(--sage-dark);">Bos Afung</strong> handle operasional harian. <strong style="color: var(--terracotta);">Bos Alung</strong> handle development & HEXACO profiling.
+        </p>
+        <p class="text-base leading-relaxed" style="color: var(--text);">
+          Cross-validation otomatis: anomali operasional dari Bos Afung di-cross-check dengan HEXACO Honesty-Humility dari Bos Alung. Anti-fraud structural by design — <em class="font-display italic" style="color: var(--sage-dark);">tidak ada 1 agent yang bisa kongkalikong sendiri</em>.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <svg viewBox="0 0 400 280" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <rect x="40" y="60" width="120" height="80" rx="8" fill="var(--white)" stroke="var(--sage)" stroke-width="2"/>
+            <text x="100" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--primary)">Bos Afung</text>
+            <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--sage-dark)" letter-spacing="1">OPS · Q4 2026</text>
+          </g>
+
+          <line x1="170" y1="100" x2="240" y2="100" stroke="var(--sage)" stroke-width="2" stroke-dasharray="4 4"/>
+          <polygon points="240,100 230,95 230,105" fill="var(--sage)"/>
+          <text x="205" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--sage-dark)" letter-spacing="1">OPS DATA →</text>
+
+          <line x1="240" y1="180" x2="170" y2="180" stroke="var(--terracotta)" stroke-width="2" stroke-dasharray="4 4"/>
+          <polygon points="170,180 180,175 180,185" fill="var(--terracotta)"/>
+          <text x="205" y="200" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta)" letter-spacing="1">← HEXACO</text>
+
+          <g>
+            <rect x="250" y="60" width="120" height="80" rx="8" fill="var(--white)" stroke="var(--terracotta)" stroke-width="2"/>
+            <text x="310" y="95" text-anchor="middle" font-family="Fraunces" font-size="22" font-weight="500" fill="var(--primary)">Bos Alung</text>
+            <text x="310" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--terracotta)" letter-spacing="1">HR · Q3 2026</text>
+          </g>
+
+          <text x="200" y="40" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--sage-dark)" letter-spacing="2">CROSS-VALIDATION</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS & ROADMAP -->
+<section class="py-24 sm:py-32 px-5 sm:px-8" style="background: var(--sand-dark);">
+  <div class="max-w-4xl mx-auto">
+    <div class="reveal mb-12">
+      <p class="text-[11px] font-mono uppercase tracking-[0.2em] mb-4" style="color: var(--sage-dark);">11 / Status</p>
+      <h2 class="font-display text-4xl sm:text-6xl font-medium leading-tight mb-6 max-w-3xl" style="color: var(--primary);">
+        Status & Roadmap.
+      </h2>
+    </div>
+
+    <div class="reveal reveal-delay-1 grid sm:grid-cols-3 gap-4 mb-12">
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--sage-dark);">✅ DONE</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Concept v1 Locked</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Filosofi "santai tapi disiplin" locked, 6 prinsip etika, 7 anomaly patterns, 4-layer architecture, integration spec dengan Bos Alung.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--sage);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--sage-dark);">⏳ DEPENDENCY</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Bos Alung Pilot</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Bos Afung development menunggu Bos Alung pilot proven dulu di LFT. Cross-validation pattern butuh Bos Alung running terlebih dahulu.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-xl" style="background: var(--white); border: 1px solid var(--border);">
+        <p class="font-mono text-[10px] uppercase tracking-widest mb-2" style="color: var(--muted);">⏸ NEXT</p>
+        <h3 class="font-display text-lg font-medium mb-2" style="color: var(--primary);">Q4 2026 Build</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text);">
+          Bot Telegram setup, geo-tag absensi engine, batch processor, dashboard React. Pilot di LFT Bintaro 5-10 karyawan.
+        </p>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-2">
+      <p class="font-mono text-xs uppercase tracking-widest mb-8" style="color: var(--muted);">Sequencing Phase</p>
+
+      <div class="phase-marker now">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--sage-dark);">
+          PHASE 1 — NOW · Concept Locked <span class="ml-2 px-2 py-0.5 rounded text-[10px]" style="background: var(--sage); color: var(--sand);">CURRENT</span>
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Bos Alung Foundation</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Bos Alung pilot proven di LFT terlebih dahulu. Bos Afung concept locked, menunggu HR foundation.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          PHASE 2 — Q3 2026
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Bos Alung Code Live</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Bos Alung onboarding engine + HEXACO profiling live di LFT. Validation data structure untuk cross-flow.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          PHASE 3 — Q4 2026
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Bos Afung Code Start</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Implementation: bot Telegram, geo-tag, chat extraction, batch processor, dashboard. Pilot 5-10 karyawan LFT.
+        </p>
+      </div>
+
+      <div class="phase-marker">
+        <p class="text-[11px] font-mono uppercase tracking-widest mb-1" style="color: var(--primary);">
+          BEYOND
+        </p>
+        <h3 class="font-display text-xl font-medium mb-2" style="color: var(--primary);">Sub-Agent Expansion (100+ karyawan)</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text);">
+          Saat karyawan klien tertentu mencapai 100+, Bos Afung refactor ke orchestrator pattern dengan 3 specialist: Attendance, Operations, Audit.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BACK TO ECOSYSTEM -->
+<section class="py-20 sm:py-28 px-5 sm:px-8" style="background: var(--sand);">
+  <div class="max-w-3xl mx-auto text-center">
+    <div class="reveal">
+      <div class="divider-ornament mb-10">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--sage);">
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2 class="font-display text-3xl sm:text-5xl font-medium leading-tight mb-6" style="color: var(--primary);">
+        Lihat tim lengkapnya.
+      </h2>
+      <p class="text-base sm:text-lg leading-relaxed mb-10" style="color: var(--text);">
+        Bos Afung adalah satu dari enam anggota tim AI Hayuna. Saat ini Budi sudah live production di LFT — pendekatan AaaS yang sama akan diterapkan di Bos Afung.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="index.html#tim" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--primary); color: var(--sand);">
+          Tim AI Hayuna
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a href="bos-alung.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition lift-hover" style="background: var(--white); color: var(--primary); border: 1px solid var(--border);">
+          Detail Bos Alung
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-16 px-5 sm:px-8" style="background: var(--primary-dark); color: rgba(251, 247, 242, 0.7);">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-12 mb-12">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="var(--sand)" stroke-width="1"/>
+            <circle cx="16" cy="16" r="9" fill="none" stroke="var(--sand)" stroke-width="0.8"/>
+            <circle cx="16" cy="16" r="2.5" fill="var(--terracotta)"/>
+          </svg>
+          <span class="font-display text-lg" style="color: var(--sand);">Hayuna AI</span>
+        </div>
+        <p class="text-xs leading-relaxed">
+          Tim AI Agent untuk operasional F&B Indonesia.<br>
+          Memayu hayuning bisnis Anda.
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Modul</p>
+        <ul class="space-y-2.5 text-xs">
+          <li><a href="budi.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Budi — Stok &amp; Gudang</a></li>
+          <li><a href="cici.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Cici — Customer Service</a></li>
+          <li><a href="bos-alung.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Bos Alung — HR Development</a></li>
+          <li><a href="bos-afung.html" class="opacity-100 transition" style="color: var(--sage-light);">→ Bos Afung — Operasional</a></li>
+          <li><a href="wulan.html" class="hover:opacity-100 opacity-70 transition" style="color: var(--sand);">Wulan — Finance + Purchasing + Accounting</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-mono uppercase tracking-wider mb-4" style="color: rgba(251, 247, 242, 0.5);">Status</p>
+        <ul class="space-y-2.5 text-xs">
+          <li>Concept Locked v1</li>
+          <li>Code Q4 2026 Target</li>
+          <li>Bandung, Indonesia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t text-center text-xs" style="border-color: rgba(251, 247, 242, 0.1);">
+      © 2026 Hayuna AI · <span class="font-display italic">Memayu Hayuning Bawana</span> · Dibangun di Indonesia
+    </div>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('mobile-menu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  document.querySelectorAll('.mobile-link').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal, .chat-demo, .use-case').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

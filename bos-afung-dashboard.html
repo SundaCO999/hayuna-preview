@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bos Afung Dashboard · Hayuna AI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  * { font-family: 'Inter Tight', sans-serif; -webkit-font-smoothing: antialiased; }
+  .font-display { font-family: 'Fraunces', serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  body { background: #FBF7F2; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+const { useState } = React;
+
+// ─── DESIGN TOKENS ───
+const colors = {
+  primary: '#0F4C5C',
+  primaryLight: '#1A6B7C',
+  primaryDark: '#08323D',
+  sand: '#FBF7F2',
+  sandDark: '#F0E9DD',
+  terracotta: '#D4823A',
+  terracottaLight: '#E89E5F',
+  sage: '#73A580',
+  sageLight: '#95C0A2',
+  sageDark: '#5A8A66',
+  amber: '#E6A817',
+  brick: '#B83A2A',
+  text: '#1A1A1A',
+  muted: '#6B6B6B',
+  border: '#E5DDD0',
+  white: '#FFFFFF',
+};
+
+// ─── ICONS (inline SVG) ───
+const Icon = ({ name, size = 16, color = 'currentColor' }) => {
+  const icons = {
+    home: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"/>,
+    users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></>,
+    map: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></>,
+    alert: <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+    message: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
+    bar: <><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>,
+    star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
+    file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></>,
+    settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>,
+    bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>,
+    search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    chevron: <polyline points="9 18 15 12 9 6"/>,
+    up: <polyline points="18 15 12 9 6 15"/>,
+    down: <polyline points="6 9 12 15 18 9"/>,
+    check: <polyline points="20 6 9 17 4 12"/>,
+    x: <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    clock: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+    camera: <><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></>,
+    eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    download: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
+    menu: <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>,
+    coffee: <><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></>,
+    package: <><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></>,
+    plus: <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    back: <><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {icons[name]}
+    </svg>
+  );
+};
+
+// ─── DUMMY DATA ───
+const karyawanData = [
+  { id: 'KRY-001', nama: 'Andi Wijaya', divisi: 'Dapur', posisi: 'Cook Helper', shift: 'Pagi', opScore: 84, attendance: 96, incidents: 1, sentiment: 'positive', trend: 'up', avatar: 'AW' },
+  { id: 'KRY-002', nama: 'Sari Indrawati', divisi: 'Server', posisi: 'Server', shift: 'Pagi', opScore: 88, attendance: 98, incidents: 0, sentiment: 'positive', trend: 'up', avatar: 'SI' },
+  { id: 'KRY-003', nama: 'Budi Hartono', divisi: 'Gudang', posisi: 'Staff Gudang', shift: 'Pagi', opScore: 76, attendance: 92, incidents: 2, sentiment: 'neutral', trend: 'stable', avatar: 'BH' },
+  { id: 'KRY-004', nama: 'Citra Lestari', divisi: 'Server', posisi: 'Captain Server', shift: 'Sore', opScore: 92, attendance: 99, incidents: 0, sentiment: 'positive', trend: 'up', avatar: 'CL' },
+  { id: 'KRY-005', nama: 'Dimas Pratama', divisi: 'Dapur', posisi: 'Koki 3', shift: 'Sore', opScore: 68, attendance: 87, incidents: 3, sentiment: 'negative', trend: 'down', avatar: 'DP' },
+  { id: 'KRY-006', nama: 'Eka Putri', divisi: 'Kasir', posisi: 'Kasir', shift: 'Pagi', opScore: 79, attendance: 95, incidents: 1, sentiment: 'positive', trend: 'up', avatar: 'EP' },
+];
+
+const attendanceLog = [
+  { id: 1, karyawan: 'Andi Wijaya', shift: 'Pagi', masuk: '08:55', pulang: '17:02', status: 'on_time', verified: true },
+  { id: 2, karyawan: 'Sari Indrawati', shift: 'Pagi', masuk: '08:48', pulang: '17:05', status: 'on_time', verified: true },
+  { id: 3, karyawan: 'Budi Hartono', shift: 'Pagi', masuk: '09:18', pulang: '17:01', status: 'late', verified: true },
+  { id: 4, karyawan: 'Citra Lestari', shift: 'Sore', masuk: '15:55', pulang: null, status: 'on_time', verified: true },
+  { id: 5, karyawan: 'Dimas Pratama', shift: 'Sore', masuk: '16:12', pulang: null, status: 'late', verified: false },
+  { id: 6, karyawan: 'Eka Putri', shift: 'Pagi', masuk: '08:50', pulang: '17:00', status: 'on_time', verified: true },
+];
+
+const incidentsLog = [
+  { id: 1, time: '19:45', type: 'customer_complaint', desc: 'Tamu meja 5 protes pesanan salah', karyawan: 'Sari Indrawati', resolved: true, severity: 'low' },
+  { id: 2, time: '20:15', type: 'stock_warning', desc: 'Ayam tinggal 5kg, weekend besok perlu restock', karyawan: 'Andi Wijaya', resolved: false, severity: 'medium' },
+  { id: 3, time: '21:30', type: 'equipment_issue', desc: 'AC dapur kurang dingin', karyawan: 'Dimas Pratama', resolved: false, severity: 'low' },
+];
+
+const anomalyFlags = [
+  { id: 1, karyawan: 'Dimas Pratama', pattern: 'Stok hilang di shift', count: '3x dalam 30 hari', severity: 'high', crossCheckAlung: 'Honesty-Humility turun 15 poin' },
+  { id: 2, karyawan: 'Budi Hartono', pattern: 'Telat berulang, alasan beda', count: '4x dalam 14 hari', severity: 'medium', crossCheckAlung: 'Conscientiousness slight decline' },
+];
+
+const customerFeedback = [
+  { time: '19:45', source: 'Direct (Captain handle)', sentiment: 'negative→resolved', desc: 'Pesanan salah, di-handle Captain dengan free dessert' },
+  { time: '17:30', source: 'Google Review', sentiment: 'positive', desc: '⭐⭐⭐⭐⭐ "Pelayanan ramah, makanan enak"' },
+  { time: '14:20', source: 'GoFood Review', sentiment: 'positive', desc: '⭐⭐⭐⭐ "Packaging rapi, sambal mantap"' },
+];
+
+// ─── COMPONENTS ───
+
+const StatusPill = ({ status }) => {
+  const config = {
+    on_time: { bg: 'rgba(115, 165, 128, 0.15)', color: colors.sageDark, label: 'On Time' },
+    late: { bg: 'rgba(230, 168, 23, 0.15)', color: colors.amber, label: 'Late' },
+    absent: { bg: 'rgba(184, 58, 42, 0.15)', color: colors.brick, label: 'Absent' },
+  }[status] || {};
+  return <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium" style={{ background: config.bg, color: config.color }}>{config.label}</span>;
+};
+
+const SeverityPill = ({ severity }) => {
+  const config = {
+    high: { bg: colors.brick, label: 'HIGH' },
+    medium: { bg: colors.amber, label: 'MEDIUM' },
+    low: { bg: colors.muted, label: 'LOW' },
+  }[severity];
+  return <span className="text-[10px] px-2 py-0.5 rounded font-bold" style={{ background: config.bg, color: colors.white }}>{config.label}</span>;
+};
+
+const ScoreBadge = ({ score, size = 'md' }) => {
+  const config = score >= 85 ? { bg: 'rgba(115, 165, 128, 0.15)', color: colors.sageDark, label: 'Excellent' }
+    : score >= 70 ? { bg: 'rgba(15, 76, 92, 0.10)', color: colors.primary, label: 'Good' }
+    : score >= 55 ? { bg: 'rgba(230, 168, 23, 0.15)', color: colors.amber, label: 'Fair' }
+    : { bg: 'rgba(184, 58, 42, 0.15)', color: colors.brick, label: 'Poor' };
+  return (
+    <div className={`inline-flex items-center gap-1.5 rounded-md font-semibold ${size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
+         style={{ background: config.bg, color: config.color }}>
+      {score}<span style={{ opacity: 0.7 }}>· {config.label}</span>
+    </div>
+  );
+};
+
+const Avatar = ({ initials, size = 'md' }) => {
+  const sizes = { sm: 'w-7 h-7 text-xs', md: 'w-9 h-9 text-sm', lg: 'w-14 h-14 text-lg' };
+  return (
+    <div className={`${sizes[size]} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}
+         style={{ background: colors.sage, color: colors.white }}>{initials}</div>
+  );
+};
+
+const StatCard = ({ iconName, label, value, sub, accentColor }) => (
+  <div className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+    <div className="flex items-start justify-between mb-2 sm:mb-3">
+      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}20` }}>
+        <Icon name={iconName} size={18} color={accentColor} />
+      </div>
+    </div>
+    <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>{value}</div>
+    <div className="text-[10px] sm:text-xs leading-tight" style={{ color: colors.muted }}>{label}</div>
+    {sub && <div className="text-[10px] mt-1 font-mono" style={{ color: colors.sage }}>{sub}</div>}
+  </div>
+);
+
+const menuItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'home' },
+  { id: 'attendance', label: 'Attendance', icon: 'map' },
+  { id: 'incidents', label: 'Incidents', icon: 'alert', badge: 3 },
+  { id: 'feedback', label: 'Feedback', icon: 'star' },
+  { id: 'anomaly', label: 'Anomaly', icon: 'shield', badge: 2 },
+  { id: 'karyawan', label: 'Karyawan', icon: 'users' },
+  { id: 'reports', label: 'Reports', icon: 'file' },
+  { id: 'settings', label: 'Settings', icon: 'settings' },
+];
+
+const DesktopSidebar = ({ currentPage, setPage }) => (
+  <div className="hidden lg:flex w-64 h-screen flex-col" style={{ background: colors.primary }}>
+    <div className="px-6 py-6 border-b" style={{ borderColor: colors.primaryLight }}>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg" style={{ background: colors.sage, color: colors.white }}>F</div>
+        <div>
+          <div className="font-bold text-white" style={{ fontFamily: 'Fraunces, serif' }}>Bos Afung</div>
+          <div className="text-xs" style={{ color: colors.sandDark, opacity: 0.7 }}>Operational Supervisor</div>
+        </div>
+      </div>
+    </div>
+    <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+      {menuItems.map(item => {
+        const active = currentPage === item.id;
+        return (
+          <button key={item.id} onClick={() => setPage(item.id)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm"
+                  style={{ background: active ? colors.primaryLight : 'transparent', color: active ? colors.white : colors.sandDark }}>
+            <div className="flex items-center gap-3">
+              <Icon name={item.icon} size={18} />
+              <span style={{ fontWeight: active ? 600 : 400 }}>{item.label}</span>
+            </div>
+            {item.badge && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: colors.sage, color: colors.white }}>{item.badge}</span>}
+          </button>
+        );
+      })}
+    </nav>
+    <div className="px-3 py-4 border-t" style={{ borderColor: colors.primaryLight }}>
+      <div className="px-3 py-2 rounded-lg" style={{ background: colors.primaryDark }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Icon name="shield" size={14} color={colors.sage} />
+          <span className="text-xs font-medium text-white">LFT Bintaro</span>
+        </div>
+        <div className="text-xs" style={{ color: colors.sandDark, opacity: 0.6 }}>Tenant Aktif</div>
+      </div>
+      <button className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm" style={{ color: colors.sandDark }}>
+        <Icon name="logout" size={16} /> Logout
+      </button>
+    </div>
+  </div>
+);
+
+const MobileBottomNav = ({ currentPage, setPage }) => {
+  const bottomItems = menuItems.slice(0, 5);
+  return (
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t" style={{ background: colors.white, borderColor: colors.border }}>
+      <div className="grid grid-cols-5">
+        {bottomItems.map(item => {
+          const active = currentPage === item.id;
+          return (
+            <button key={item.id} onClick={() => setPage(item.id)} className="flex flex-col items-center justify-center py-2 px-1 relative"
+                    style={{ color: active ? colors.sageDark : colors.muted }}>
+              <div className="relative">
+                <Icon name={item.icon} size={20} color={active ? colors.sageDark : colors.muted} />
+                {item.badge && (
+                  <span className="absolute -top-1 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" 
+                        style={{ background: colors.sage, color: colors.white }}>{item.badge}</span>
+                )}
+              </div>
+              <span className="text-[10px] mt-1 font-medium">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const TopBar = ({ pageTitle, onMenuClick }) => (
+  <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b sticky top-0 z-20" 
+       style={{ background: colors.white, borderColor: colors.border }}>
+    <div className="flex items-center gap-3 flex-1 min-w-0">
+      <button onClick={onMenuClick} className="lg:hidden p-2 -ml-2" style={{ color: colors.text }}>
+        <Icon name="menu" size={20} />
+      </button>
+      <div className="min-w-0 flex-1">
+        <h1 className="text-base sm:text-xl font-semibold truncate" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>{pageTitle}</h1>
+        <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block" style={{ color: colors.muted }}>Daily batch update · 23:00 last sync</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 sm:gap-3">
+      <button className="relative p-2 rounded-lg" style={{ background: colors.sand }}>
+        <Icon name="bell" size={16} color={colors.primary} />
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold" 
+              style={{ background: colors.sage, color: colors.white }}>2</span>
+      </button>
+      <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l" style={{ borderColor: colors.border }}>
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-semibold text-sm" style={{ background: colors.sage, color: colors.white }}>R</div>
+        <div className="hidden sm:block">
+          <div className="text-sm font-medium" style={{ color: colors.text }}>Richard</div>
+          <div className="text-xs" style={{ color: colors.muted }}>Owner LFT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── PAGES ───
+
+const DashboardPage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <StatCard iconName="users" label="Karyawan Present" value="6/6" sub="100% attendance" accentColor={colors.sage} />
+      <StatCard iconName="alert" label="Incidents Today" value="3" sub="2 unresolved" accentColor={colors.amber} />
+      <StatCard iconName="star" label="Customer Feedback" value="3" sub="2 positive · 1 resolved" accentColor={colors.primary} />
+      <StatCard iconName="shield" label="Anomaly Flags" value="2" sub="1 high severity" accentColor={colors.brick} />
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="lg:col-span-2 p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>Daily Operational Log</h3>
+          <button className="text-xs font-medium" style={{ color: colors.sageDark }}>Lihat Semua →</button>
+        </div>
+        <div className="space-y-3">
+          {[
+            { icon: 'check', color: colors.sage, text: 'Absensi semua karyawan verified', time: '08:55 - 16:12', detail: '6 karyawan present, 2 late' },
+            { icon: 'alert', color: colors.amber, text: 'Stock warning: Ayam 5kg (Andi)', time: '20:15', detail: 'Weekend besok perlu restock' },
+            { icon: 'message', color: colors.primary, text: 'Customer complaint meja 5 — resolved', time: '19:45', detail: 'Captain handle, free dessert' },
+            { icon: 'star', color: colors.sageDark, text: '2 review positif masuk', time: '14:20, 17:30', detail: 'Google + GoFood' },
+            { icon: 'shield', color: colors.brick, text: 'Anomaly flag: Dimas Pratama', time: 'Auto-detect', detail: 'Stok hilang pattern + Bos Alung cross-check' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-0" style={{ borderColor: colors.border }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15` }}>
+                <Icon name={item.icon} size={14} color={item.color} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs sm:text-sm" style={{ color: colors.text }}>{item.text}</div>
+                <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: colors.muted }}>{item.time} · {item.detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+        <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>Top Operational Score</h3>
+        <div className="space-y-3">
+          {karyawanData.filter(k => k.opScore >= 80).slice(0, 4).map(k => (
+            <div key={k.id} className="flex items-center gap-3 p-2 rounded-lg -m-2">
+              <Avatar initials={k.avatar} size="sm" />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate" style={{ color: colors.text }}>{k.nama}</div>
+                <div className="text-xs" style={{ color: colors.muted }}>{k.posisi}</div>
+              </div>
+              <ScoreBadge score={k.opScore} size="sm" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>Daily Summary</h3>
+        <span className="text-[10px] font-mono px-2 py-1 rounded" style={{ background: 'rgba(115, 165, 128, 0.15)', color: colors.sageDark }}>BATCH 23:00</span>
+      </div>
+      <div className="p-4 rounded-lg" style={{ background: 'rgba(115, 165, 128, 0.08)', borderLeft: `3px solid ${colors.sage}` }}>
+        <p className="text-xs sm:text-sm" style={{ color: colors.text }}>
+          <strong style={{ color: colors.sageDark }}>Operasional smooth.</strong> Semua karyawan present, 2 telat. 1 stock warning butuh follow up gudang besok pagi. Customer sentiment overall positive (2 review masuk). 1 anomaly flag HIGH untuk Dimas Pratama perlu review owner — cross-validation dengan HEXACO data dari Bos Alung consistent.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const AttendancePage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <StatCard iconName="check" label="On Time" value="4" accentColor={colors.sage} />
+      <StatCard iconName="clock" label="Late" value="2" accentColor={colors.amber} />
+      <StatCard iconName="x" label="Absent" value="0" accentColor={colors.brick} />
+    </div>
+
+    <div className="rounded-xl border overflow-hidden" style={{ background: colors.white, borderColor: colors.border }}>
+      <div className="px-4 sm:px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: colors.border }}>
+        <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>Attendance Log · Hari Ini</h3>
+        <button className="text-xs font-medium flex items-center gap-1" style={{ color: colors.sageDark }}>
+          <Icon name="download" size={12} /> Export
+        </button>
+      </div>
+
+      <div className="hidden md:block">
+        <table className="w-full">
+          <thead style={{ background: colors.sand }}>
+            <tr>
+              {['Karyawan', 'Shift', 'Masuk', 'Pulang', 'Status', 'Verified', ''].map(h => (
+                <th key={h} className="text-left text-xs font-semibold px-6 py-3" style={{ color: colors.muted, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {attendanceLog.map(a => (
+              <tr key={a.id} className="border-t" style={{ borderColor: colors.border }}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar initials={a.karyawan.split(' ').map(n => n[0]).join('')} size="sm" />
+                    <span className="text-sm font-medium" style={{ color: colors.text }}>{a.karyawan}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm" style={{ color: colors.text }}>{a.shift}</td>
+                <td className="px-6 py-4 text-sm font-mono" style={{ color: colors.text }}>{a.masuk}</td>
+                <td className="px-6 py-4 text-sm font-mono" style={{ color: colors.text }}>{a.pulang || '-'}</td>
+                <td className="px-6 py-4"><StatusPill status={a.status} /></td>
+                <td className="px-6 py-4">
+                  {a.verified ? (
+                    <span className="inline-flex items-center gap-1 text-xs" style={{ color: colors.sageDark }}>
+                      <Icon name="check" size={12} color={colors.sageDark} /> Geo + Foto
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs" style={{ color: colors.amber }}>
+                      <Icon name="alert" size={12} color={colors.amber} /> Pending
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  <button className="text-xs flex items-center gap-1" style={{ color: colors.sageDark }}>
+                    <Icon name="camera" size={12} color={colors.sageDark} /> Foto
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="md:hidden divide-y" style={{ borderColor: colors.border }}>
+        {attendanceLog.map(a => (
+          <div key={a.id} className="p-4">
+            <div className="flex items-start gap-3 mb-2">
+              <Avatar initials={a.karyawan.split(' ').map(n => n[0]).join('')} size="md" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm truncate" style={{ color: colors.text }}>{a.karyawan}</div>
+                    <div className="text-xs" style={{ color: colors.muted }}>Shift {a.shift}</div>
+                  </div>
+                  <StatusPill status={a.status} />
+                </div>
+                <div className="flex items-center gap-3 mt-2 text-xs font-mono" style={{ color: colors.text }}>
+                  <span>↑ {a.masuk}</span>
+                  <span>↓ {a.pulang || '-'}</span>
+                  {a.verified && <Icon name="check" size={12} color={colors.sageDark} />}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const IncidentsPage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>3 incidents hari ini · 2 unresolved · Auto-extracted dari chat operasional</p>
+
+    <div className="space-y-3">
+      {incidentsLog.map(i => (
+        <div key={i.id} className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                 style={{ background: i.severity === 'high' ? `${colors.brick}15` : i.severity === 'medium' ? `${colors.amber}15` : `${colors.muted}15` }}>
+              <Icon name="alert" size={18} color={i.severity === 'high' ? colors.brick : i.severity === 'medium' ? colors.amber : colors.muted} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-2 gap-2 flex-wrap">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-semibold text-xs sm:text-sm capitalize" style={{ color: colors.text }}>{i.type.replace('_', ' ')}</span>
+                    <SeverityPill severity={i.severity} />
+                  </div>
+                  <div className="text-[10px] sm:text-xs" style={{ color: colors.muted }}>{i.karyawan} · {i.time}</div>
+                </div>
+                {i.resolved ? (
+                  <span className="text-[10px] sm:text-xs px-2 py-1 rounded font-medium" style={{ background: 'rgba(115, 165, 128, 0.15)', color: colors.sageDark }}>Resolved</span>
+                ) : (
+                  <span className="text-[10px] sm:text-xs px-2 py-1 rounded font-medium" style={{ background: 'rgba(230, 168, 23, 0.15)', color: colors.amber }}>Pending</span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm" style={{ color: colors.text }}>{i.desc}</p>
+              {!i.resolved && (
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium" style={{ background: colors.sage, color: colors.white }}>Mark Resolved</button>
+                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium border" style={{ borderColor: colors.border, color: colors.text }}>Follow Up</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const FeedbackPage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <StatCard iconName="star" label="Positive" value="2" accentColor={colors.sage} />
+      <StatCard iconName="message" label="Neutral" value="0" accentColor={colors.muted} />
+      <StatCard iconName="alert" label="Negative" value="1" sub="Resolved" accentColor={colors.amber} />
+    </div>
+
+    <div className="space-y-3">
+      {customerFeedback.map((f, i) => (
+        <div key={i} className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+          <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
+            <div>
+              <p className="font-semibold text-xs sm:text-sm" style={{ color: colors.text }}>{f.source}</p>
+              <p className="text-[10px] sm:text-xs" style={{ color: colors.muted }}>{f.time}</p>
+            </div>
+            <span className="text-[10px] sm:text-xs px-2 py-1 rounded font-medium" 
+                  style={{ background: f.sentiment.includes('positive') ? 'rgba(115, 165, 128, 0.15)' : 'rgba(230, 168, 23, 0.15)', 
+                           color: f.sentiment.includes('positive') ? colors.sageDark : colors.amber }}>
+              {f.sentiment}
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm" style={{ color: colors.text }}>{f.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const AnomalyPage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>2 anomaly flags · Cross-validated dengan HEXACO data Bos Alung</p>
+
+    <div className="space-y-4">
+      {anomalyFlags.map(a => (
+        <div key={a.id} className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
+          <div className="flex items-start gap-3 sm:gap-4 mb-3">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                 style={{ background: a.severity === 'high' ? `${colors.brick}15` : `${colors.amber}15` }}>
+              <Icon name="shield" size={18} color={a.severity === 'high' ? colors.brick : colors.amber} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="font-semibold text-sm" style={{ color: colors.text }}>{a.karyawan}</span>
+                <SeverityPill severity={a.severity} />
+              </div>
+              <p className="text-xs sm:text-sm mb-1" style={{ color: colors.text }}>{a.pattern}</p>
+              <p className="text-[10px] sm:text-xs font-mono" style={{ color: colors.muted }}>{a.count}</p>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg" style={{ background: 'rgba(212, 130, 58, 0.08)', borderLeft: `3px solid ${colors.terracotta}` }}>
+            <p className="text-[10px] font-mono uppercase tracking-wider mb-1" style={{ color: colors.terracotta }}>CROSS-CHECK BOS ALUNG</p>
+            <p className="text-xs sm:text-sm" style={{ color: colors.text }}>{a.crossCheckAlung}</p>
+          </div>
+
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium" style={{ background: colors.primary, color: colors.white }}>Review Detail</button>
+            <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium border" style={{ borderColor: colors.border, color: colors.text }}>Data Pendukung</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const KaryawanPage = () => (
+  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
+    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>Operational score per karyawan · Update daily batch</p>
+
+    <div className="rounded-xl border overflow-hidden" style={{ background: colors.white, borderColor: colors.border }}>
+      <div className="hidden md:block">
+        <table className="w-full">
+          <thead style={{ background: colors.sand }}>
+            <tr>
+              {['Karyawan', 'Divisi · Posisi', 'Op Score', 'Attendance', 'Incidents', 'Sentiment', ''].map(h => (
+                <th key={h} className="text-left text-xs font-semibold px-6 py-3" style={{ color: colors.muted, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {karyawanData.map(k => (
+              <tr key={k.id} className="border-t" style={{ borderColor: colors.border }}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar initials={k.avatar} size="sm" />
+                    <span className="text-sm font-medium" style={{ color: colors.text }}>{k.nama}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm" style={{ color: colors.text }}>{k.posisi}</div>
+                  <div className="text-xs" style={{ color: colors.muted }}>{k.divisi}</div>
+                </td>
+                <td className="px-6 py-4"><ScoreBadge score={k.opScore} /></td>
+                <td className="px-6 py-4 text-sm" style={{ color: colors.text }}>{k.attendance}%</td>
+                <td className="px-6 py-4 text-sm" style={{ color: k.incidents > 2 ? colors.brick : colors.text }}>{k.incidents}</td>
+                <td className="px-6 py-4">
+                  <span className="text-xs capitalize" style={{ 
+                    color: k.sentiment === 'positive' ? colors.sageDark : k.sentiment === 'negative' ? colors.brick : colors.muted 
+                  }}>{k.sentiment}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <Icon name={k.trend === 'up' ? 'up' : k.trend === 'down' ? 'down' : 'chevron'} size={16} 
+                        color={k.trend === 'up' ? colors.sage : k.trend === 'down' ? colors.brick : colors.muted} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="md:hidden divide-y" style={{ borderColor: colors.border }}>
+        {karyawanData.map(k => (
+          <div key={k.id} className="p-4">
+            <div className="flex items-start gap-3">
+              <Avatar initials={k.avatar} size="md" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm truncate" style={{ color: colors.text }}>{k.nama}</div>
+                    <div className="text-xs" style={{ color: colors.muted }}>{k.posisi} · {k.divisi}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <ScoreBadge score={k.opScore} size="sm" />
+                  <span className="text-[10px]" style={{ color: colors.muted }}>Att {k.attendance}%</span>
+                  <span className="text-[10px]" style={{ color: k.incidents > 2 ? colors.brick : colors.muted }}>{k.incidents} incidents</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const PlaceholderPage = ({ title }) => (
+  <div className="p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
+    <div className="rounded-xl border p-8 sm:p-12 text-center" style={{ background: colors.white, borderColor: colors.border }}>
+      <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(115, 165, 128, 0.12)' }}>
+        <Icon name="file" size={20} color={colors.sage} />
+      </div>
+      <h3 className="font-semibold text-lg mb-2" style={{ color: colors.text, fontFamily: 'Fraunces, serif' }}>{title}</h3>
+      <p className="text-sm" style={{ color: colors.muted }}>Coming soon · Q4 2026</p>
+    </div>
+  </div>
+);
+
+// ─── MAIN APP ───
+
+function BosAfungDashboard() {
+  const [page, setPage] = useState('dashboard');
+
+  const pageTitles = {
+    dashboard: 'Dashboard',
+    attendance: 'Attendance Log',
+    incidents: 'Incidents',
+    feedback: 'Customer Feedback',
+    anomaly: 'Anomaly Flags',
+    karyawan: 'Karyawan',
+    reports: 'Reports',
+    settings: 'Settings',
+  };
+
+  const renderPage = () => {
+    switch (page) {
+      case 'dashboard': return <DashboardPage />;
+      case 'attendance': return <AttendancePage />;
+      case 'incidents': return <IncidentsPage />;
+      case 'feedback': return <FeedbackPage />;
+      case 'anomaly': return <AnomalyPage />;
+      case 'karyawan': return <KaryawanPage />;
+      case 'reports': return <PlaceholderPage title="Reports" />;
+      case 'settings': return <PlaceholderPage title="Settings" />;
+      default: return <DashboardPage />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: colors.sand }}>
+      <DesktopSidebar currentPage={page} setPage={setPage} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar pageTitle={pageTitles[page]} onMenuClick={() => setPage('dashboard')} />
+        <div className="flex-1 overflow-y-auto">{renderPage()}</div>
+      </div>
+      <MobileBottomNav currentPage={page} setPage={setPage} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<BosAfungDashboard />);
+
+</script>
+
+</body>
+</html>
