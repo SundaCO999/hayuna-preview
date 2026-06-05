@@ -1,962 +1,221 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bos Alung — Dashboard Owner View (Mockup) · Hayuna AI</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bos Alung — Hayuna AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- React + Babel via CDN -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-<!-- Lucide icons UMD (provides window.lucide) -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
-<style>
-  * { font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; margin: 0; }
-  /* Override Sora -> Fraunces in inline styles (heading typography) */
-  [style*="Sora"] { font-family: 'Fraunces', Georgia, serif !important; font-weight: 500 !important; letter-spacing: -0.01em; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('hy-theme')||''}catch(e){}</script>
 </head>
 <body>
-
-<div id="root"></div>
-
-<script type="text/babel" data-presets="react">
-const { useState } = React;
-
-// ─── Icon helper — use lucide via UMD ───
-const makeIcon = (iconName) => {
-  return ({ size = 18, className = '', style = {}, strokeWidth = 2, ...rest }) => {
-    const ref = React.useRef(null);
-    React.useEffect(() => {
-      if (ref.current && window.lucide) {
-        ref.current.innerHTML = '';
-        const svg = window.lucide.createElement(window.lucide[iconName] || window.lucide.HelpCircle);
-        svg.setAttribute('width', size);
-        svg.setAttribute('height', size);
-        svg.setAttribute('stroke-width', strokeWidth);
-        ref.current.appendChild(svg);
-      }
-    }, [size, strokeWidth]);
-    return <span ref={ref} className={className} style={{ display: 'inline-flex', color: style.color || 'currentColor', ...style }} {...rest} />;
-  };
-};
-
-// All icons used
-const Home = makeIcon('House');
-const Users = makeIcon('Users');
-const UserCheck = makeIcon('UserCheck');
-const Award = makeIcon('Award');
-const AlertTriangle = makeIcon('TriangleAlert');
-const BookOpen = makeIcon('BookOpen');
-const FileText = makeIcon('FileText');
-const Settings = makeIcon('Settings');
-const LogOut = makeIcon('LogOut');
-const Search = makeIcon('Search');
-const Bell = makeIcon('Bell');
-const ChevronRight = makeIcon('ChevronRight');
-const TrendingUp = makeIcon('TrendingUp');
-const TrendingDown = makeIcon('TrendingDown');
-const Minus = makeIcon('Minus');
-const MessageSquare = makeIcon('MessageSquare');
-const Shield = makeIcon('Shield');
-const Filter = makeIcon('Filter');
-const Download = makeIcon('Download');
-const Plus = makeIcon('Plus');
-const CheckCircle2 = makeIcon('CircleCheck');
-const XCircle = makeIcon('CircleX');
-const FileEdit = makeIcon('FilePen');
-const Send = makeIcon('Send');
-const BarChart3 = makeIcon('ChartColumn');
-const Menu = makeIcon('Menu');
-const X = makeIcon('X');
-const ArrowLeft = makeIcon('ArrowLeft');
-const ArrowUpRight = makeIcon('ArrowUpRight');
-const ArrowDownRight = makeIcon('ArrowDownRight');
-const Eye = makeIcon('Eye');
-
-const colors = {
-  primary: '#0F4C5C', primaryLight: '#1A6B7C', primaryDark: '#08323D',
-  sand: '#FBF7F2', sandDark: '#F0E9DD', terracotta: '#D4823A',
-  terracottaLight: '#E89E5F', sage: '#73A580', amber: '#E6A817',
-  brick: '#B83A2A', text: '#1A1A1A', muted: '#6B6B6B',
-  border: '#E5DDD0', white: '#FFFFFF',
-};
-
-const karyawanData = [
-  { id: 'KRY-001', nama: 'Andi Wijaya', divisi: 'Dapur', posisi: 'Cook Helper', outlet: 'Bintaro', masaKerja: 2, status: 'probation', score: 78, trend: 'naik', avatar: 'AW' },
-  { id: 'KRY-002', nama: 'Sari Indrawati', divisi: 'Server', posisi: 'Server', outlet: 'Bintaro', masaKerja: 8, status: 'kontrak', score: 85, trend: 'naik', avatar: 'SI' },
-  { id: 'KRY-003', nama: 'Budi Hartono', divisi: 'Gudang', posisi: 'Staff Gudang', outlet: 'Bintaro', masaKerja: 14, status: 'tetap', score: 72, trend: 'stabil', avatar: 'BH' },
-  { id: 'KRY-004', nama: 'Citra Lestari', divisi: 'Server', posisi: 'Captain Server', outlet: 'Bintaro', masaKerja: 24, status: 'tetap', score: 92, trend: 'naik', avatar: 'CL' },
-  { id: 'KRY-005', nama: 'Dimas Pratama', divisi: 'Dapur', posisi: 'Koki 3', outlet: 'Bintaro', masaKerja: 18, status: 'tetap', score: 68, trend: 'turun', avatar: 'DP' },
-  { id: 'KRY-006', nama: 'Eka Putri', divisi: 'Kasir', posisi: 'Kasir', outlet: 'Bintaro', masaKerja: 1, status: 'probation', score: 71, trend: 'naik', avatar: 'EP' },
-  { id: 'KRY-007', nama: 'Fajar Nugroho', divisi: 'Dapur', posisi: 'Koki 2', outlet: 'Bintaro', masaKerja: 30, status: 'tetap', score: 88, trend: 'stabil', avatar: 'FN' },
-  { id: 'KRY-008', nama: 'Gita Maharani', divisi: 'Server', posisi: 'Server', outlet: 'Bintaro', masaKerja: 5, status: 'kontrak', score: 45, trend: 'turun', avatar: 'GM' },
-];
-
-const flagsData = [
-  { id: 1, karyawan: 'Gita Maharani', tanggal: '2 hari lalu', jenis: 'Inkonsistensi Jawaban', severity: 'high', deskripsi: 'Jawaban skenario etika berubah signifikan vs minggu lalu', status: 'pending' },
-  { id: 2, karyawan: 'Dimas Pratama', tanggal: '4 hari lalu', jenis: 'Penurunan Engagement', severity: 'medium', deskripsi: 'Response rate turun 40% dalam 3 minggu terakhir', status: 'pending' },
-  { id: 3, karyawan: 'Budi Hartono', tanggal: '1 minggu lalu', jenis: 'Suspected AI Response', severity: 'low', deskripsi: 'Pattern jawaban quiz menunjukkan kemungkinan bantuan AI eksternal', status: 'reviewed' },
-];
-
-const onboardingTimeline = [
-  { karyawan: 'Andi Wijaya', divisi: 'Dapur', day: 45, total: 90, currentModul: 'Modul 3: Standar Memasak', nextStep: 'Quiz Modul 3' },
-  { karyawan: 'Eka Putri', divisi: 'Kasir', day: 28, total: 90, currentModul: 'Modul 2: Sistem Pembayaran', nextStep: 'Mid-Probation Review' },
-];
-
-const kandidatPromosi = [
-  { nama: 'Citra Lestari', dari: 'Captain Server', ke: 'Supervisor Outlet', score: 92, masaKerja: 24, finalExam: 'pending' },
-  { nama: 'Fajar Nugroho', dari: 'Koki 2', ke: 'Head Chef', score: 88, masaKerja: 30, finalExam: 'submitted' },
-];
-
-const risetMateri = [
-  { id: 1, tanggal: '3 hari lalu', topik: 'Food Safety Standard Indonesia 2026', sumber: 'BPOM Indonesia', status: 'pending' },
-  { id: 2, tanggal: '1 minggu lalu', topik: 'Tren Plating Asian Fusion', sumber: 'Restaurant Industry Weekly', status: 'pending' },
-  { id: 3, tanggal: '2 minggu lalu', topik: 'Customer Service di Era Digital F&B', sumber: 'Industry Report', status: 'approved' },
-];
-
-const activityFeed = [
-  { time: '10 menit lalu', text: 'Quiz Modul 3 diselesaikan Andi Wijaya — 82', type: 'quiz' },
-  { time: '25 menit lalu', text: 'Chat profiling baru: Sari Indrawati', type: 'chat' },
-  { time: '1 jam lalu', text: 'Flag baru: Gita Maharani — Inkonsistensi', type: 'flag' },
-  { time: '2 jam lalu', text: 'Materi riset menunggu approval: Food Safety 2026', type: 'riset' },
-  { time: '4 jam lalu', text: 'Composite score bulanan diupdate (8 karyawan)', type: 'score' },
-];
-
-const ScoreBadge = ({ score, size = 'md' }) => {
-  const config = score >= 80 ? { bg: '#73A58015', color: colors.sage, label: 'Excellent' }
-    : score >= 65 ? { bg: '#0F4C5C15', color: colors.primary, label: 'Good' }
-    : score >= 50 ? { bg: '#E6A81715', color: colors.amber, label: 'Fair' }
-    : { bg: '#B83A2A15', color: colors.brick, label: 'Poor' };
-  return (
-    <div className={`inline-flex items-center gap-1.5 rounded-md font-semibold ${size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
-         style={{ background: config.bg, color: config.color }}>
-      {score}<span style={{ opacity: 0.7 }}>· {config.label}</span>
-    </div>
-  );
-};
-
-const TrendIcon = ({ trend, size = 14 }) => {
-  if (trend === 'naik') return <TrendingUp size={size} style={{ color: colors.sage }} />;
-  if (trend === 'turun') return <TrendingDown size={size} style={{ color: colors.brick }} />;
-  return <Minus size={size} style={{ color: colors.muted }} />;
-};
-
-const StatusPill = ({ status }) => {
-  const config = {
-    probation: { bg: '#E6A81715', color: colors.amber, label: 'Probation' },
-    kontrak: { bg: '#0F4C5C15', color: colors.primary, label: 'Kontrak' },
-    tetap: { bg: '#73A58015', color: colors.sage, label: 'Tetap' },
-  }[status];
-  return (
-    <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded font-medium" style={{ background: config.bg, color: config.color }}>{config.label}</span>
-  );
-};
-
-const SeverityPill = ({ severity }) => {
-  const config = {
-    high: { bg: colors.brick, color: colors.white, label: 'HIGH' },
-    medium: { bg: colors.amber, color: colors.white, label: 'MEDIUM' },
-    low: { bg: colors.muted, color: colors.white, label: 'LOW' },
-  }[severity];
-  return <span className="text-[10px] px-2 py-0.5 rounded font-bold" style={{ background: config.bg, color: config.color }}>{config.label}</span>;
-};
-
-const Avatar = ({ initials, size = 'md' }) => {
-  const sizes = { sm: 'w-7 h-7 text-xs', md: 'w-9 h-9 text-sm', lg: 'w-14 h-14 text-lg' };
-  return (
-    <div className={`${sizes[size]} rounded-full flex items-center justify-center font-semibold flex-shrink-0`}
-         style={{ background: colors.primary, color: colors.white }}>{initials}</div>
-  );
-};
-
-const StatCard = ({ icon: Icon, label, value, change, changeType, accentColor }) => (
-  <div className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-    <div className="flex items-start justify-between mb-2 sm:mb-3">
-      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15` }}>
-        <Icon size={18} style={{ color: accentColor }} />
-      </div>
-      {change && (
-        <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium" style={{ color: changeType === 'up' ? colors.sage : colors.brick }}>
-          {changeType === 'up' ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
-          <span className="hidden sm:inline">{change}</span>
-        </div>
-      )}
-    </div>
-    <div className="text-xl sm:text-2xl font-bold mb-0.5 sm:mb-1" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>{value}</div>
-    <div className="text-[10px] sm:text-xs leading-tight" style={{ color: colors.muted }}>{label}</div>
-  </div>
-);
-
-const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'karyawan', label: 'Karyawan', icon: Users },
-  { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
-  { id: 'promosi', label: 'Promosi', icon: Award },
-  { id: 'flags', label: 'Flags', icon: AlertTriangle, badge: 2 },
-  { id: 'riset', label: 'Riset', icon: BookOpen, badge: 2 },
-  { id: 'laporan', label: 'Laporan', icon: FileText },
-  { id: 'settings', label: 'Settings', icon: Settings },
-];
-
-const DesktopSidebar = ({ currentPage, setPage }) => (
-  <div className="hidden lg:flex w-64 h-screen flex-col" style={{ background: colors.primary }}>
-    <div className="px-6 py-6 border-b" style={{ borderColor: colors.primaryLight }}>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg" style={{ background: colors.terracotta, color: colors.white }}>B</div>
-        <div>
-          <div className="font-bold text-white" style={{ fontFamily: 'Sora, sans-serif' }}>Bos Alung</div>
-          <div className="text-xs" style={{ color: colors.sandDark, opacity: 0.7 }}>HR Development & Profiler</div>
-        </div>
-      </div>
-    </div>
-    <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-      {menuItems.map(item => {
-        const Icon = item.icon;
-        const active = currentPage === item.id;
-        return (
-          <button key={item.id} onClick={() => setPage(item.id)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm"
-                  style={{ background: active ? colors.primaryLight : 'transparent', color: active ? colors.white : colors.sandDark }}>
-            <div className="flex items-center gap-3"><Icon size={18} /><span style={{ fontWeight: active ? 600 : 400 }}>{item.label}</span></div>
-            {item.badge && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: colors.terracotta, color: colors.white }}>{item.badge}</span>}
-          </button>
-        );
-      })}
+<div class="mock-banner">MOCKUP — Bos Alung v2 · data dummy (<strong>hayuna-demo</strong>) · belum wired ke backend</div>
+<div class="app-shell">
+  <aside class="sidebar" style="--agent-color: var(--agent-bos-alung);">
+    <a class="sidebar-brand" href="portal.html">
+      <span class="hayuna-logo">H</span>
+      <span><span class="sidebar-brand-text">Bos Alung</span><div class="sidebar-brand-sub">HR &amp; Tim</div></span>
+    </a>
+    <nav class="sidebar-nav">
+      <a class="sidebar-item active" data-view="dashboard" data-title="Dashboard"><span class="sidebar-item-icon">▦</span> Dashboard</a>
+      <a class="sidebar-item" data-view="kary" data-title="Karyawan"><span class="sidebar-item-icon">👥</span> Karyawan</a>
+      <a class="sidebar-item" data-view="kand" data-title="Kandidat"><span class="sidebar-item-icon">🧑‍💼</span> Kandidat</a>
+      <a class="sidebar-item" data-view="onb" data-title="Onboarding"><span class="sidebar-item-icon">✅</span> Onboarding</a>
+      <a class="sidebar-item" data-view="promo" data-title="Promosi"><span class="sidebar-item-icon">🏆</span> Promosi</a>
+      <a class="sidebar-item" data-view="flags" data-title="Flags"><span class="sidebar-item-icon">⚠️</span> Flags</a>
+      <a class="sidebar-item" data-view="sched" data-title="Schedule"><span class="sidebar-item-icon">⚙️</span> Schedule</a>
     </nav>
-    <div className="px-3 py-4 border-t" style={{ borderColor: colors.primaryLight }}>
-      <div className="px-3 py-2 rounded-lg" style={{ background: colors.primaryDark }}>
-        <div className="flex items-center gap-2 mb-1"><Shield size={14} style={{ color: colors.terracotta }} /><span className="text-xs font-medium text-white">LFT Bintaro</span></div>
-        <div className="text-xs" style={{ color: colors.sandDark, opacity: 0.6 }}>Tenant Aktif</div>
-      </div>
-      <button className="w-full mt-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm" style={{ color: colors.sandDark }}>
-        <LogOut size={16} /> Logout
-      </button>
-    </div>
-  </div>
-);
+    <div class="sidebar-foot"><div class="tenant-pill"><span class="tenant-pill-label">Tenant</span><span class="tenant-pill-name">hayuna-demo</span></div></div>
+  </aside>
+  <div class="sidebar-backdrop"></div>
 
-const MobileDrawer = ({ open, onClose, currentPage, setPage }) => (
-  <>
-    {open && <div className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-40" onClick={onClose} />}
-    <div className={`lg:hidden fixed top-0 left-0 bottom-0 w-72 z-50 flex flex-col transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`} style={{ background: colors.primary }}>
-      <div className="px-5 py-5 border-b flex items-center justify-between" style={{ borderColor: colors.primaryLight }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg" style={{ background: colors.terracotta, color: colors.white }}>B</div>
-          <div>
-            <div className="font-bold text-white" style={{ fontFamily: 'Sora, sans-serif' }}>Bos Alung</div>
-            <div className="text-xs" style={{ color: colors.sandDark, opacity: 0.7 }}>HR Development & Profiler</div>
+  <main class="content">
+    <header class="content-header">
+      <button class="hamburger">☰</button>
+      <div class="page-title" id="page-title">Dashboard<div class="page-title-sub">Ringkasan HR &amp; tim</div></div>
+      <div class="content-actions">
+        <button class="icon-btn js-theme" title="Mode terang/gelap"><svg class="icon theme-ico-light" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="icon theme-ico-dark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+        <div class="owner-menu-wrap">
+          <button class="owner-trigger"><span class="owner-avatar">RD</span><span class="owner-trigger-text"><span class="owner-trigger-name">Ko Richard</span><span class="owner-trigger-tenant">hayuna-demo</span></span></button>
+          <div class="owner-dropdown" hidden>
+            <div class="owner-dropdown-head"><div class="owner-dropdown-name">Ko Richard Djuanto</div><div class="owner-dropdown-email">owner@hayuna-demo</div></div>
+            <button class="owner-dropdown-item" data-stub="Ganti Password"><span class="owner-dropdown-item-icon">🔑</span> Ganti Password</button>
+            <a class="owner-dropdown-item" href="portal.html"><span class="owner-dropdown-item-icon">▦</span> Ke Portal</a>
+            <button class="owner-dropdown-item danger" data-stub="Logout"><span class="owner-dropdown-item-icon">⎋</span> Logout</button>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 -mr-2" style={{ color: colors.white }}><X size={20} /></button>
       </div>
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-        {menuItems.map(item => {
-          const Icon = item.icon;
-          const active = currentPage === item.id;
-          return (
-            <button key={item.id} onClick={() => { setPage(item.id); onClose(); }} className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm"
-                    style={{ background: active ? colors.primaryLight : 'transparent', color: active ? colors.white : colors.sandDark }}>
-              <div className="flex items-center gap-3"><Icon size={18} /><span style={{ fontWeight: active ? 600 : 400 }}>{item.label}</span></div>
-              {item.badge && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: colors.terracotta, color: colors.white }}>{item.badge}</span>}
-            </button>
-          );
-        })}
-      </nav>
-    </div>
-  </>
-);
+    </header>
 
-const MobileBottomNav = ({ currentPage, setPage }) => {
-  const bottomItems = menuItems.slice(0, 5);
-  return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t" style={{ background: colors.white, borderColor: colors.border }}>
-      <div className="grid grid-cols-5">
-        {bottomItems.map(item => {
-          const Icon = item.icon;
-          const active = currentPage === item.id;
-          return (
-            <button key={item.id} onClick={() => setPage(item.id)} className="flex flex-col items-center justify-center py-2 px-1 relative"
-                    style={{ color: active ? colors.primary : colors.muted }}>
-              <div className="relative">
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-                {item.badge && (
-                  <span className="absolute -top-1 -right-2 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" 
-                        style={{ background: colors.terracotta, color: colors.white }}>{item.badge}</span>
-                )}
-              </div>
-              <span className="text-[10px] mt-1 font-medium">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const TopBar = ({ pageTitle, onMenuClick, onBack, showBack }) => (
-  <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b sticky top-0 z-20" 
-       style={{ background: colors.white, borderColor: colors.border }}>
-    <div className="flex items-center gap-3 flex-1 min-w-0">
-      {showBack ? (
-        <button onClick={onBack} className="lg:hidden p-2 -ml-2" style={{ color: colors.text }}><ArrowLeft size={20} /></button>
-      ) : (
-        <button onClick={onMenuClick} className="lg:hidden p-2 -ml-2" style={{ color: colors.text }}><Menu size={20} /></button>
-      )}
-      <div className="min-w-0 flex-1">
-        <h1 className="text-base sm:text-xl font-semibold truncate" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>{pageTitle}</h1>
-        <p className="text-[10px] sm:text-xs mt-0.5 hidden sm:block" style={{ color: colors.muted, fontStyle: 'italic' }}>Memayu hayuning bisnis Anda</p>
-      </div>
-    </div>
-    <div className="flex items-center gap-2 sm:gap-3">
-      <button className="relative p-2 rounded-lg" style={{ background: colors.sand }}>
-        <Bell size={16} style={{ color: colors.primary }} />
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold" 
-              style={{ background: colors.terracotta, color: colors.white }}>2</span>
-      </button>
-      <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l" style={{ borderColor: colors.border }}>
-        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-semibold text-sm" style={{ background: colors.terracotta, color: colors.white }}>R</div>
-        <div className="hidden sm:block">
-          <div className="text-sm font-medium" style={{ color: colors.text }}>Richard</div>
-          <div className="text-xs" style={{ color: colors.muted }}>Owner LFT</div>
+    <div class="content-main">
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view active">
+        <div class="agent-desc" style="--agent-color: var(--agent-bos-alung);">
+          <div class="agent-desc-icon">A</div>
+          <div class="agent-desc-body">
+            <div class="agent-desc-title">Bos Alung — Asisten HR &amp; Tim</div>
+            <div class="agent-desc-text">Seleksi kandidat (kuis HEXACO), skor perilaku berkala, onboarding via Telegram, deteksi flag/anomali, dan kelola jalur promosi tim.</div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-);
 
-const DashboardPage = ({ setPage, setSelectedKaryawan }) => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      <StatCard icon={Users} label="Karyawan Aktif" value="34" change="+2 bulan ini" changeType="up" accentColor={colors.primary} />
-      <StatCard icon={UserCheck} label="Probation" value="3" change="2 hampir selesai" changeType="up" accentColor={colors.terracotta} />
-      <StatCard icon={Award} label="Kandidat Promosi" value="2" change="1 pending" changeType="up" accentColor={colors.sage} />
-      <StatCard icon={AlertTriangle} label="Flags Aktif" value="2" change="1 high" changeType="down" accentColor={colors.brick} />
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-      <div className="lg:col-span-2 p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Aktivitas Terbaru</h3>
-          <button className="text-xs font-medium" style={{ color: colors.primary }}>Lihat Semua →</button>
+        <div class="summary-row">
+          <div class="metric"><div class="metric-label">Karyawan Aktif</div><div class="metric-value">14</div><div class="metric-sub">probation 3 · kontrak 6 · tetap 5</div></div>
+          <div class="metric"><div class="metric-label">Rata² Composite</div><div class="metric-value c-primary">71</div><div class="metric-sub">skala 0–100</div></div>
+          <div class="metric"><div class="metric-label">Flag Pending</div><div class="metric-value c-amber">2</div><div class="metric-sub">perlu review owner</div></div>
+          <div class="metric"><div class="metric-label">Kandidat Promosi</div><div class="metric-value c-green">3</div><div class="metric-sub">siap dinilai</div></div>
+          <div class="metric"><div class="metric-label">Kandidat Baru</div><div class="metric-value c-blue">5</div><div class="metric-sub">dalam proses seleksi</div></div>
         </div>
-        <div className="space-y-3">
-          {activityFeed.map((activity, i) => (
-            <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-0" style={{ borderColor: colors.border }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: colors.sand }}>
-                {activity.type === 'quiz' && <CheckCircle2 size={14} style={{ color: colors.sage }} />}
-                {activity.type === 'chat' && <MessageSquare size={14} style={{ color: colors.primary }} />}
-                {activity.type === 'flag' && <AlertTriangle size={14} style={{ color: colors.brick }} />}
-                {activity.type === 'riset' && <BookOpen size={14} style={{ color: colors.terracotta }} />}
-                {activity.type === 'score' && <BarChart3 size={14} style={{ color: colors.amber }} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs sm:text-sm" style={{ color: colors.text }}>{activity.text}</div>
-                <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: colors.muted }}>{activity.time}</div>
+
+        <div class="panels">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">👥</span> Distribusi Status</div></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Status</th><th class="cell-num">Jumlah</th><th>Bar</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="badge badge-gray">PROBATION</span></td><td class="cell-num">3</td><td><div style="background:var(--border-soft);height:8px;border-radius:6px;width:140px;overflow:hidden;"><div style="background:var(--warning);height:100%;width:21%;"></div></div></td></tr>
+                  <tr><td><span class="badge badge-blue">KONTRAK</span></td><td class="cell-num">6</td><td><div style="background:var(--border-soft);height:8px;border-radius:6px;width:140px;overflow:hidden;"><div style="background:var(--primary);height:100%;width:43%;"></div></div></td></tr>
+                  <tr><td><span class="badge badge-green">TETAP</span></td><td class="cell-num">5</td><td><div style="background:var(--border-soft);height:8px;border-radius:6px;width:140px;overflow:hidden;"><div style="background:var(--success);height:100%;width:36%;"></div></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">⚠️</span> Flag Terbaru</div><span class="panel-meta">2 pending</span></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Karyawan</th><th>Severity</th><th>Tipe</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-strong">Joko S.</td><td><span class="badge badge-red">HIGH</span></td><td class="cell-dim">selisih kas berulang</td></tr>
+                  <tr><td class="cell-strong">Maya R.</td><td><span class="badge badge-amber">MEDIUM</span></td><td class="cell-dim">telat &gt;3x minggu ini</td></tr>
+                  <tr><td class="cell-strong">Dani P.</td><td><span class="badge badge-gray">LOW</span></td><td class="cell-dim">skor engagement turun</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KARYAWAN -->
+      <section id="view-kary" class="view">
+        <div class="panel panel-full">
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">👥</span> Karyawan</div><span class="panel-meta">14 aktif</span></div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>Status</th><th>Divisi</th><th>Posisi</th><th class="cell-num">Masa (bln)</th><th>Composite</th><th>Trend</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-strong">Andi W.</td><td><span class="badge badge-green">TETAP</span></td><td>Bar</td><td>Head Barista</td><td class="cell-num">28</td><td><span class="score-badge score-excellent">84 Excellent</span></td><td class="trend-up">↑</td></tr>
+                <tr><td class="cell-strong">Sinta L.</td><td><span class="badge badge-blue">KONTRAK</span></td><td>Kasir</td><td>Kasir</td><td class="cell-num">11</td><td><span class="score-badge score-good">72 Good</span></td><td class="trend-up">↑</td></tr>
+                <tr><td class="cell-strong">Maya R.</td><td><span class="badge badge-blue">KONTRAK</span></td><td>Service</td><td>Waiter</td><td class="cell-num">7</td><td><span class="score-badge score-fair">58 Fair</span></td><td class="trend-down">↓</td></tr>
+                <tr><td class="cell-strong">Dani P.</td><td><span class="badge badge-gray">PROBATION</span></td><td>Bar</td><td>Barista</td><td class="cell-num">2</td><td><span class="score-badge score-fair">61 Fair</span></td><td class="trend-flat">—</td></tr>
+                <tr><td class="cell-strong">Joko S.</td><td><span class="badge badge-blue">KONTRAK</span></td><td>Kasir</td><td>Kasir</td><td class="cell-num">9</td><td><span class="score-badge score-low">44 Perlu Perhatian</span></td><td class="trend-down">↓</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- KANDIDAT -->
+      <section id="view-kand" class="view">
+        <div class="content-actions" style="margin-bottom:16px;"><button class="btn btn-accent" data-stub="Tambah kandidat">+ Tambah Kandidat</button></div>
+        <div class="panel panel-full">
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">🧑‍💼</span> Kandidat</div><span class="panel-meta">5 dalam proses</span></div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>Posisi</th><th>Modul Kuis</th><th class="cell-num">Skor</th><th>Tested</th><th>Keputusan</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-strong">Rudi H.</td><td>Barista</td><td class="cell-mono">cook_seleksi_pre</td><td class="cell-num">78 / 65</td><td class="cell-dim">29 Mei</td><td><span class="badge badge-amber">PENDING</span></td></tr>
+                <tr><td class="cell-strong">Tia M.</td><td>Kasir</td><td class="cell-mono">kasir_seleksi_pre</td><td class="cell-num">81 / 65</td><td class="cell-dim">28 Mei</td><td><span class="badge badge-green">ACCEPTED</span></td></tr>
+                <tr><td class="cell-strong">Bayu A.</td><td>Waiter</td><td class="cell-mono">service_pre</td><td class="cell-num">52 / 65</td><td class="cell-dim">27 Mei</td><td><span class="badge badge-red">REJECTED</span></td></tr>
+                <tr><td class="cell-strong">Lina K.</td><td>Barista</td><td class="cell-dim">belum tes</td><td class="cell-num">—</td><td class="cell-dim">—</td><td><span class="badge badge-gray">INVITED</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ONBOARDING -->
+      <section id="view-onb" class="view">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">✅</span> Buat Karyawan Baru</div></div>
+            <div class="panel-body">
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <input placeholder="Nama lengkap"><input placeholder="Panggilan"><input placeholder="Divisi"><input placeholder="Posisi"><input type="date">
+                <button class="btn btn-accent" data-stub="Onboard">Onboard &amp; Generate Invite</button>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-        <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Top Performer</h3>
-        <div className="space-y-3">
-          {karyawanData.filter(k => k.score >= 80).slice(0, 4).map(k => (
-            <div key={k.id} className="flex items-center gap-3 cursor-pointer p-2 rounded-lg -m-2"
-                 onClick={() => { setSelectedKaryawan(k); setPage('karyawan-detail'); }}>
-              <Avatar initials={k.avatar} size="sm" />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium truncate" style={{ color: colors.text }}>{k.nama}</div>
-                <div className="text-xs" style={{ color: colors.muted }}>{k.posisi}</div>
-              </div>
-              <ScoreBadge score={k.score} size="sm" />
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">📨</span> Pending Onboarding</div></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Nama</th><th>Invite Code</th><th>Telegram</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-strong">Tia M.</td><td class="cell-mono">HYN-4827</td><td><span class="badge badge-amber">belum link</span></td></tr>
+                  <tr><td class="cell-strong">Lina K.</td><td class="cell-mono">HYN-9103</td><td><span class="badge badge-green">linked</span></td></tr>
+                </tbody>
+              </table>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      </section>
+
+      <!-- PROMOSI -->
+      <section id="view-promo" class="view">
+        <div class="panel panel-full">
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">🏆</span> Kandidat Promosi</div><span class="panel-meta">3 siap dinilai</span></div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>Status Sekarang</th><th>Posisi</th><th>Composite</th><th>Trend</th><th>Aksi</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-strong">Andi W.</td><td><span class="badge badge-green">TETAP</span></td><td>Head Barista</td><td><span class="score-badge score-excellent">84</span></td><td class="trend-up">↑</td><td><button class="btn" data-stub="Review promosi">Review</button></td></tr>
+                <tr><td class="cell-strong">Sinta L.</td><td><span class="badge badge-blue">KONTRAK</span></td><td>Kasir</td><td><span class="score-badge score-good">72</span></td><td class="trend-up">↑</td><td><button class="btn" data-stub="Review promosi">Review</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FLAGS -->
+      <section id="view-flags" class="view">
+        <div class="panel panel-full">
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">⚠️</span> Flags &amp; Anomali</div><span class="panel-meta">2 pending · 5 reviewed</span></div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead><tr><th>Karyawan</th><th>Severity</th><th>Tipe</th><th>Deskripsi</th><th>Aksi Owner</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-strong">Joko S.</td><td><span class="badge badge-red">HIGH</span></td><td>Anti-fraud</td><td class="cell-dim">Selisih kas 3x dalam 2 minggu</td><td><span class="badge badge-amber">PENDING</span></td></tr>
+                <tr><td class="cell-strong">Maya R.</td><td><span class="badge badge-amber">MEDIUM</span></td><td>Disiplin</td><td class="cell-dim">Telat &gt;3x minggu ini</td><td><span class="badge badge-amber">PENDING</span></td></tr>
+                <tr><td class="cell-strong">Dani P.</td><td><span class="badge badge-gray">LOW</span></td><td>Engagement</td><td class="cell-dim">Skor engagement turun 12 poin</td><td><span class="badge badge-green">REVIEWED</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCHEDULE -->
+      <section id="view-sched" class="view">
+        <div class="panel panel-full">
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">⚙️</span> Scheduled Jobs (D116)</div></div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead><tr><th>Job</th><th>Cron</th><th>Status</th><th>Last Run</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-strong">behavioral_score_recalc</td><td class="cell-mono">0 2 * * *</td><td><span class="badge badge-green">ACTIVE</span></td><td class="cell-dim">02:00 · OK</td></tr>
+                <tr><td class="cell-strong">flag_scan</td><td class="cell-mono">0 */6 * * *</td><td><span class="badge badge-green">ACTIVE</span></td><td class="cell-dim">06:00 · OK</td></tr>
+                <tr><td class="cell-strong">promosi_eval</td><td class="cell-mono">0 3 * * 1</td><td><span class="badge badge-gray">PAUSED</span></td><td class="cell-dim">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Onboarding Aktif</h3>
-        <button className="text-xs font-medium flex items-center gap-1" onClick={() => setPage('onboarding')} style={{ color: colors.primary }}>
-          Detail <ChevronRight size={12} />
-        </button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        {onboardingTimeline.map((o, i) => (
-          <div key={i} className="p-3 sm:p-4 rounded-lg border" style={{ borderColor: colors.border, background: colors.sand }}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="font-semibold text-sm" style={{ color: colors.text }}>{o.karyawan}</div>
-                <div className="text-xs" style={{ color: colors.muted }}>{o.divisi}</div>
-              </div>
-              <span className="text-xs font-bold" style={{ color: colors.primary }}>Hari {o.day}/{o.total}</span>
-            </div>
-            <div className="w-full h-2 rounded-full mb-2" style={{ background: colors.sandDark }}>
-              <div className="h-full rounded-full" style={{ width: `${(o.day/o.total)*100}%`, background: colors.terracotta }} />
-            </div>
-            <div className="text-xs" style={{ color: colors.text }}>{o.currentModul}</div>
-            <div className="text-xs mt-1" style={{ color: colors.muted }}>Next: {o.nextStep}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-const KaryawanPage = ({ setPage, setSelectedKaryawan }) => {
-  const [filter, setFilter] = useState('all');
-  const filtered = filter === 'all' ? karyawanData : karyawanData.filter(k => k.divisi.toLowerCase() === filter);
-  return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-        <div className="flex items-center gap-2 min-w-max sm:min-w-0 sm:justify-between sm:flex-wrap">
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap" 
-                    style={{ background: filter === 'all' ? colors.primary : colors.white, color: filter === 'all' ? colors.white : colors.text, border: `1px solid ${colors.border}` }}
-                    onClick={() => setFilter('all')}>Semua ({karyawanData.length})</button>
-            {['Dapur', 'Server', 'Gudang', 'Kasir'].map(div => (
-              <button key={div} className="px-3 py-1.5 rounded-lg text-xs sm:text-sm whitespace-nowrap" 
-                      style={{ background: filter === div.toLowerCase() ? colors.primary : colors.white, color: filter === div.toLowerCase() ? colors.white : colors.text, border: `1px solid ${colors.border}` }}
-                      onClick={() => setFilter(div.toLowerCase())}>{div}</button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="hidden md:block rounded-xl border overflow-hidden" style={{ background: colors.white, borderColor: colors.border }}>
-        <table className="w-full">
-          <thead style={{ background: colors.sand }}>
-            <tr>{['Karyawan', 'Divisi & Posisi', 'Masa Kerja', 'Status', 'Score', 'Trend', ''].map(h => (
-              <th key={h} className="text-left text-xs font-semibold px-6 py-3" style={{ color: colors.muted, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</th>
-            ))}</tr>
-          </thead>
-          <tbody>
-            {filtered.map((k) => (
-              <tr key={k.id} className="border-t cursor-pointer hover:bg-gray-50" style={{ borderColor: colors.border }}
-                  onClick={() => { setSelectedKaryawan(k); setPage('karyawan-detail'); }}>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar initials={k.avatar} size="md" />
-                    <div>
-                      <div className="font-medium text-sm" style={{ color: colors.text }}>{k.nama}</div>
-                      <div className="text-xs" style={{ color: colors.muted }}>{k.id}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm" style={{ color: colors.text }}>{k.posisi}</div>
-                  <div className="text-xs" style={{ color: colors.muted }}>{k.divisi} · {k.outlet}</div>
-                </td>
-                <td className="px-6 py-4 text-sm" style={{ color: colors.text }}>{k.masaKerja} bulan</td>
-                <td className="px-6 py-4"><StatusPill status={k.status} /></td>
-                <td className="px-6 py-4"><ScoreBadge score={k.score} /></td>
-                <td className="px-6 py-4"><TrendIcon trend={k.trend} /></td>
-                <td className="px-6 py-4"><ChevronRight size={16} style={{ color: colors.muted }} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="md:hidden space-y-3">
-        {filtered.map(k => (
-          <div key={k.id} className="p-4 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}
-               onClick={() => { setSelectedKaryawan(k); setPage('karyawan-detail'); }}>
-            <div className="flex items-start gap-3">
-              <Avatar initials={k.avatar} size="md" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm truncate" style={{ color: colors.text }}>{k.nama}</div>
-                    <div className="text-xs" style={{ color: colors.muted }}>{k.posisi} · {k.divisi}</div>
-                  </div>
-                  <TrendIcon trend={k.trend} size={16} />
-                </div>
-                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                  <ScoreBadge score={k.score} size="sm" />
-                  <StatusPill status={k.status} />
-                  <span className="text-[10px]" style={{ color: colors.muted }}>{k.masaKerja} bln</span>
-                </div>
-              </div>
-              <ChevronRight size={18} style={{ color: colors.muted }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const KaryawanDetailPage = ({ karyawan, setPage }) => {
-  if (!karyawan) return <div className="p-8">Pilih karyawan dari daftar</div>;
-  
-  // Bobot HEXACO per posisi (sesuai concept v2)
-  // Kasir: H 35%, C 30%, X 10%, A 10%, O 8%, E 7%
-  // Server: X 25%, A 25%, C 25%, H 15%, O 5%, E 5%
-  // Cook Helper: C 30%, A 25%, H 20%, X 10%, O 10%, E 5%
-  // Head Chef: C 25%, H 25%, O 20%, A 15%, X 10%, E 5%
-  // Default (Captain, Supervisor, dll): C 25%, H 20%, A 20%, X 15%, O 15%, E 5%
-  const getWeights = (posisi) => {
-    const p = (posisi || '').toLowerCase();
-    if (p.includes('kasir')) return { H: 35, C: 30, X: 10, A: 10, O: 8, E: 7 };
-    if (p.includes('server')) return { X: 25, A: 25, C: 25, H: 15, O: 5, E: 5 };
-    if (p.includes('cook helper') || p.includes('cook') && p.includes('helper')) return { C: 30, A: 25, H: 20, X: 10, O: 10, E: 5 };
-    if (p.includes('head chef') || p.includes('head cook')) return { C: 25, H: 25, O: 20, A: 15, X: 10, E: 5 };
-    return { C: 25, H: 20, A: 20, X: 15, O: 15, E: 5 };
-  };
-  const w = getWeights(karyawan.posisi);
-  
-  // Skor per dimensi (variasi dari composite untuk visual demo)
-  const base = karyawan.score;
-  const dimensiScore = [
-    { code: 'H', label: 'Honesty-Humility', score: Math.min(95, base + 4), weight: w.H, priority: w.H >= 25 },
-    { code: 'E', label: 'Emotionality', score: Math.max(40, base - 13), weight: w.E, priority: false },
-    { code: 'X', label: 'Extraversion', score: base + 2, weight: w.X, priority: w.X >= 25 },
-    { code: 'A', label: 'Agreeableness', score: base - 1, weight: w.A, priority: w.A >= 25 },
-    { code: 'C', label: 'Conscientiousness', score: Math.min(95, base + 7), weight: w.C, priority: w.C >= 25 },
-    { code: 'O', label: 'Openness', score: base - 5, weight: w.O, priority: w.O >= 20 },
-  ];
-  
-  return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-      <button className="hidden lg:flex text-sm items-center gap-1 hover:underline" onClick={() => setPage('karyawan')} style={{ color: colors.primary }}>← Kembali ke Daftar</button>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-1 p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-          <div className="flex flex-col items-center text-center pb-4 sm:pb-6 border-b" style={{ borderColor: colors.border }}>
-            <Avatar initials={karyawan.avatar} size="lg" />
-            <h2 className="text-lg font-semibold mt-3" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>{karyawan.nama}</h2>
-            <p className="text-sm" style={{ color: colors.muted }}>{karyawan.id}</p>
-            <div className="mt-3"><StatusPill status={karyawan.status} /></div>
-          </div>
-          <div className="pt-4 sm:pt-6 space-y-3 text-sm">
-            <div className="flex justify-between"><span style={{ color: colors.muted }}>Posisi</span><span style={{ color: colors.text, fontWeight: 500 }}>{karyawan.posisi}</span></div>
-            <div className="flex justify-between"><span style={{ color: colors.muted }}>Divisi</span><span style={{ color: colors.text, fontWeight: 500 }}>{karyawan.divisi}</span></div>
-            <div className="flex justify-between"><span style={{ color: colors.muted }}>Outlet</span><span style={{ color: colors.text, fontWeight: 500 }}>{karyawan.outlet}</span></div>
-            <div className="flex justify-between"><span style={{ color: colors.muted }}>Masa Kerja</span><span style={{ color: colors.text, fontWeight: 500 }}>{karyawan.masaKerja} bulan</span></div>
-          </div>
-          <button className="w-full mt-4 sm:mt-6 py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2" style={{ background: colors.primary, color: colors.white }}>
-            <MessageSquare size={14} /> Lihat Riwayat Chat
-          </button>
-        </div>
-
-        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-          <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div>
-                <h3 className="font-semibold text-sm sm:text-base" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Composite Score · HEXACO</h3>
-                <p className="text-[10px] sm:text-xs mt-0.5" style={{ color: colors.muted }}>Weighted by posisi: {karyawan.posisi}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primary, fontFamily: 'Sora, sans-serif' }}>{karyawan.score}</span>
-                <TrendIcon trend={karyawan.trend} size={18} />
-              </div>
-            </div>
-            <div className="space-y-3">
-              {dimensiScore.map(d => (
-                <div key={d.code}>
-                  <div className="flex justify-between items-center text-xs sm:text-sm mb-1 gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold flex-shrink-0" 
-                            style={{ background: d.priority ? colors.terracotta : colors.sandDark, 
-                                     color: d.priority ? colors.white : colors.muted }}>
-                        {d.code}
-                      </span>
-                      <span style={{ color: colors.text, fontWeight: 500 }} className="truncate">
-                        {d.label} <span style={{ color: colors.muted, fontWeight: 400 }}>· {d.weight}%</span>
-                      </span>
-                    </div>
-                    <span style={{ color: colors.text, fontWeight: 600 }} className="flex-shrink-0">{d.score}</span>
-                  </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: colors.sandDark }}>
-                    <div className="h-full rounded-full" style={{ width: `${d.score}%`, background: d.score >= 80 ? colors.sage : d.score >= 65 ? colors.primary : d.score >= 50 ? colors.amber : colors.brick }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 pt-3 border-t flex items-center gap-2 text-[10px] sm:text-xs" style={{ borderColor: colors.border, color: colors.muted }}>
-              <span className="inline-flex items-center justify-center w-3 h-3 rounded text-[8px] font-bold" style={{ background: colors.terracotta, color: colors.white }}>●</span>
-              <span>Dimensi prioritas untuk posisi ini (bobot ≥20-25%)</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <h4 className="text-xs sm:text-sm font-semibold" style={{ color: colors.text }}>Quiz Terakhir</h4>
-                <CheckCircle2 size={16} style={{ color: colors.sage }} />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold mb-1" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>82</div>
-              <div className="text-[10px] sm:text-xs" style={{ color: colors.muted }}>Modul 3 · 3 hari lalu</div>
-            </div>
-            <div className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <h4 className="text-xs sm:text-sm font-semibold" style={{ color: colors.text }}>Chat Profiling</h4>
-                <MessageSquare size={16} style={{ color: colors.primary }} />
-              </div>
-              <div className="text-xl sm:text-2xl font-bold mb-1" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>24</div>
-              <div className="text-[10px] sm:text-xs" style={{ color: colors.muted }}>Response rate 87%</div>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-            <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Riwayat Quiz</h3>
-            <div className="space-y-2">
-              {[
-                { modul: 'Modul 3: Standar Memasak', nilai: 82, tanggal: '3 hari lalu' },
-                { modul: 'Modul 2: Food Safety', nilai: 78, tanggal: '2 minggu lalu' },
-                { modul: 'Modul 1: Peraturan Dasar', nilai: 85, tanggal: '5 minggu lalu' },
-              ].map((q, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg" style={{ background: colors.sand }}>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs sm:text-sm font-medium truncate" style={{ color: colors.text }}>{q.modul}</div>
-                    <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: colors.muted }}>{q.tanggal}</div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-2">
-                    <span className="font-bold text-sm" style={{ color: colors.primary }}>{q.nilai}</span>
-                    <CheckCircle2 size={16} style={{ color: colors.sage }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const OnboardingPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <div className="flex items-center justify-between gap-3 flex-wrap">
-      <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>3 karyawan sedang probation</p>
-      <button className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2" style={{ background: colors.terracotta, color: colors.white }}>
-        <Plus size={14} /> <span className="hidden sm:inline">Onboard Karyawan Baru</span><span className="sm:hidden">Onboard Baru</span>
-      </button>
-    </div>
-    <div className="space-y-3 sm:space-y-4">
-      {[...onboardingTimeline, { karyawan: 'Joko Susilo', divisi: 'Dapur', day: 60, total: 90, currentModul: 'Refresher Modul', nextStep: 'Day 90 Eval' }].map((o, i) => (
-        <div key={i} className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-          <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <Avatar initials={o.karyawan.split(' ').map(n => n[0]).join('')} size="lg" />
-              <div className="min-w-0">
-                <h3 className="font-semibold text-base sm:text-lg truncate" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>{o.karyawan}</h3>
-                <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>{o.divisi} · Day {o.day}/{o.total}</p>
-              </div>
-            </div>
-            <button className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1.5 rounded-lg border whitespace-nowrap" style={{ borderColor: colors.border, color: colors.primary }}>Detail</button>
-          </div>
-          <div className="w-full h-2 rounded-full mb-3" style={{ background: colors.sandDark }}>
-            <div className="h-full rounded-full" style={{ width: `${(o.day/o.total)*100}%`, background: colors.terracotta }} />
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mt-3 sm:mt-4">
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5 sm:mb-1" style={{ color: colors.muted }}>Modul</div>
-              <div className="text-xs sm:text-sm font-medium" style={{ color: colors.text }}>{o.currentModul}</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5 sm:mb-1" style={{ color: colors.muted }}>Quiz Lulus</div>
-              <div className="text-xs sm:text-sm font-medium" style={{ color: colors.text }}>{Math.floor(o.day/15)}/5</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5 sm:mb-1" style={{ color: colors.muted }}>Score</div>
-              <div className="text-xs sm:text-sm font-medium" style={{ color: colors.text }}>{75 + Math.floor((i+1)*4)}</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5 sm:mb-1" style={{ color: colors.muted }}>Next</div>
-              <div className="text-xs sm:text-sm font-medium" style={{ color: colors.terracotta }}>{o.nextStep}</div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const PromosiPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>2 kandidat · Owner final decision</p>
-    <div className="space-y-3 sm:space-y-4">
-      {kandidatPromosi.map((k, i) => (
-        <div key={i} className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-          <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <Avatar initials={k.nama.split(' ').map(n => n[0]).join('')} size="lg" />
-              <div className="min-w-0">
-                <h3 className="font-semibold text-base sm:text-lg truncate" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>{k.nama}</h3>
-                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span className="text-xs sm:text-sm" style={{ color: colors.muted }}>{k.dari}</span>
-                  <ChevronRight size={12} style={{ color: colors.terracotta }} />
-                  <span className="text-xs sm:text-sm font-semibold" style={{ color: colors.terracotta }}>{k.ke}</span>
-                </div>
-              </div>
-            </div>
-            <ScoreBadge score={k.score} />
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: colors.muted }}>Masa Kerja</div>
-              <div className="text-xs sm:text-sm font-semibold" style={{ color: colors.text }}>{k.masaKerja} bln</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: colors.muted }}>Quiz Avg</div>
-              <div className="text-xs sm:text-sm font-semibold" style={{ color: colors.text }}>89/100</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: colors.muted }}>Pelanggaran</div>
-              <div className="text-xs sm:text-sm font-semibold" style={{ color: colors.sage }}>0 aktif</div>
-            </div>
-            <div className="p-2.5 sm:p-3 rounded-lg" style={{ background: colors.sand }}>
-              <div className="text-[10px] sm:text-xs mb-0.5" style={{ color: colors.muted }}>Final Exam</div>
-              <div className="text-xs sm:text-sm font-semibold" style={{ color: k.finalExam === 'submitted' ? colors.sage : colors.amber }}>{k.finalExam === 'submitted' ? 'Submitted' : 'Pending'}</div>
-            </div>
-          </div>
-          {k.finalExam === 'submitted' && (
-            <div className="p-3 sm:p-4 rounded-lg mb-3 sm:mb-4" style={{ background: colors.sand, border: `1px solid ${colors.border}` }}>
-              <div className="flex items-center gap-2 mb-2"><FileEdit size={14} style={{ color: colors.primary }} /><span className="text-xs sm:text-sm font-medium" style={{ color: colors.text }}>Essay Final Exam</span></div>
-              <p className="text-xs italic" style={{ color: colors.muted }}>"Visi saya untuk Long Feng Tang ke depan adalah membangun dapur sentral..."</p>
-              <button className="mt-2 text-xs font-medium" style={{ color: colors.primary }}>Baca Lengkap →</button>
-            </div>
-          )}
-          <div className="flex items-center gap-2 flex-wrap">
-            {k.finalExam === 'pending' ? (
-              <button className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2" style={{ background: colors.terracotta, color: colors.white }}>
-                <Send size={14} /> Kirim Final Exam
-              </button>
-            ) : (
-              <>
-                <button className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2" style={{ background: colors.sage, color: colors.white }}>
-                  <CheckCircle2 size={14} /> Approve
-                </button>
-                <button className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2 border" style={{ borderColor: colors.border, color: colors.brick, background: colors.white }}>
-                  <XCircle size={14} /> Reject
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const FlagsPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>3 flags · 2 pending · 1 high severity</p>
-    <div className="space-y-3">
-      {flagsData.map(f => (
-        <div key={f.id} className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                 style={{ background: f.severity === 'high' ? `${colors.brick}15` : f.severity === 'medium' ? `${colors.amber}15` : `${colors.muted}15` }}>
-              <AlertTriangle size={18} style={{ color: f.severity === 'high' ? colors.brick : f.severity === 'medium' ? colors.amber : colors.muted }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-2 gap-2 flex-wrap">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="font-semibold text-xs sm:text-sm" style={{ color: colors.text }}>{f.jenis}</span>
-                    <SeverityPill severity={f.severity} />
-                  </div>
-                  <div className="text-[10px] sm:text-xs" style={{ color: colors.muted }}>{f.karyawan} · {f.tanggal}</div>
-                </div>
-                {f.status === 'reviewed' ? (
-                  <span className="text-[10px] sm:text-xs px-2 py-1 rounded font-medium" style={{ background: `${colors.sage}15`, color: colors.sage }}>Reviewed</span>
-                ) : (
-                  <span className="text-[10px] sm:text-xs px-2 py-1 rounded font-medium" style={{ background: `${colors.amber}15`, color: colors.amber }}>Pending</span>
-                )}
-              </div>
-              <p className="text-xs sm:text-sm" style={{ color: colors.text }}>{f.deskripsi}</p>
-              {f.status === 'pending' && (
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium" style={{ background: colors.primary, color: colors.white }}>Review & Resolve</button>
-                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium border" style={{ borderColor: colors.border, color: colors.text }}>Data Pendukung</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const RisetPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>2 pending approval · 1 approved bulan ini</p>
-    <div className="space-y-3 sm:space-y-4">
-      {risetMateri.map(r => (
-        <div key={r.id} className="p-4 sm:p-5 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${colors.terracotta}15` }}>
-              <BookOpen size={18} style={{ color: colors.terracotta }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <h4 className="font-semibold text-xs sm:text-sm" style={{ color: colors.text }}>{r.topik}</h4>
-                <span className="text-[10px] px-2 py-1 rounded font-medium flex-shrink-0 ml-2" 
-                      style={{ background: r.status === 'approved' ? `${colors.sage}15` : `${colors.amber}15`, color: r.status === 'approved' ? colors.sage : colors.amber }}>
-                  {r.status === 'approved' ? 'Approved' : 'Pending'}
-                </span>
-              </div>
-              <div className="text-[10px] sm:text-xs mb-2" style={{ color: colors.muted }}>{r.sumber} · {r.tanggal}</div>
-              <p className="text-xs sm:text-sm" style={{ color: colors.text, opacity: 0.8 }}>Update terbaru standar food safety berdasarkan regulasi BPOM 2026.</p>
-              {r.status === 'pending' && (
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium flex items-center gap-1" style={{ background: colors.sage, color: colors.white }}>
-                    <CheckCircle2 size={12} /> Approve
-                  </button>
-                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium flex items-center gap-1 border" style={{ borderColor: colors.border, color: colors.text }}>
-                    <FileEdit size={12} /> Revisi
-                  </button>
-                  <button className="text-[10px] sm:text-xs px-3 py-1.5 rounded font-medium flex items-center gap-1 border" style={{ borderColor: colors.border, color: colors.brick }}>
-                    <XCircle size={12} /> Reject
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const LaporanPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>Generate laporan custom untuk owner</p>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      {[
-        { icon: Users, title: 'Laporan Individual', desc: 'Detail performa per karyawan', color: colors.primary },
-        { icon: BarChart3, title: 'Ringkasan Tim', desc: 'Overview semua karyawan aktif', color: colors.terracotta },
-        { icon: Award, title: 'Promosi Tracker', desc: 'Status kandidat & history', color: colors.sage },
-        { icon: AlertTriangle, title: 'Anomali & Flags', desc: 'Riwayat flags & resolusi', color: colors.brick },
-        { icon: BookOpen, title: 'Riset Materi', desc: 'Approved & pending', color: colors.amber },
-        { icon: Shield, title: 'Audit Log', desc: 'Privacy audit & akses', color: colors.primaryLight },
-      ].map((r, i) => {
-        const Icon = r.icon;
-        return (
-          <div key={i} className="p-4 sm:p-5 rounded-xl border cursor-pointer" style={{ background: colors.white, borderColor: colors.border }}>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `${r.color}15` }}>
-              <Icon size={20} style={{ color: r.color }} />
-            </div>
-            <h4 className="font-semibold text-sm mb-1" style={{ color: colors.text }}>{r.title}</h4>
-            <p className="text-xs mb-3 sm:mb-4" style={{ color: colors.muted }}>{r.desc}</p>
-            <div className="flex items-center gap-2">
-              <button className="text-xs px-3 py-1.5 rounded font-medium flex items-center gap-1" style={{ background: colors.primary, color: colors.white }}>
-                <Download size={12} /> Excel
-              </button>
-              <button className="text-xs px-3 py-1.5 rounded font-medium flex items-center gap-1 border" style={{ borderColor: colors.border, color: colors.text }}>
-                <Eye size={12} /> Preview
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const SettingsPage = () => (
-  <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 pb-24 lg:pb-8">
-    <p className="text-xs sm:text-sm" style={{ color: colors.muted }}>Konfigurasi tenant dan preferensi</p>
-    <div className="p-4 sm:p-6 rounded-xl border" style={{ background: colors.white, borderColor: colors.border }}>
-      <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4" style={{ color: colors.text, fontFamily: 'Sora, sans-serif' }}>Tenant Info</h3>
-      <div className="space-y-4">
-        <div>
-          <label className="text-xs font-medium" style={{ color: colors.muted }}>Nama Tenant</label>
-          <input type="text" defaultValue="LFT Bintaro" className="mt-1 w-full px-3 py-2.5 rounded-lg border text-sm outline-none"
-                 style={{ borderColor: colors.border, background: colors.white, color: colors.text }} />
-        </div>
-        <div>
-          <label className="text-xs font-medium" style={{ color: colors.muted }}>Tenant ID</label>
-          <input type="text" defaultValue="LFT" disabled className="mt-1 w-full px-3 py-2.5 rounded-lg border text-sm" 
-                 style={{ borderColor: colors.border, background: colors.sand, color: colors.muted }} />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-medium" style={{ color: colors.muted }}>Owner</label>
-            <input type="text" defaultValue="Richard" className="mt-1 w-full px-3 py-2.5 rounded-lg border text-sm outline-none"
-                   style={{ borderColor: colors.border, background: colors.white, color: colors.text }} />
-          </div>
-          <div>
-            <label className="text-xs font-medium" style={{ color: colors.muted }}>Outlet</label>
-            <input type="text" defaultValue="Bintaro Plaza" className="mt-1 w-full px-3 py-2.5 rounded-lg border text-sm outline-none"
-                   style={{ borderColor: colors.border, background: colors.white, color: colors.text }} />
-          </div>
-        </div>
-        <div>
-          <label className="text-xs font-medium" style={{ color: colors.muted }}>Bot Telegram</label>
-          <input type="text" defaultValue="@BosAlung_BOT" disabled className="mt-1 w-full px-3 py-2.5 rounded-lg border text-sm" 
-                 style={{ borderColor: colors.border, background: colors.sand, color: colors.muted }} />
-        </div>
-        <button className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-medium" style={{ background: colors.primary, color: colors.white }}>
-          Simpan Perubahan
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-function BosAlungDashboard() {
-  const [page, setPage] = useState('dashboard');
-  const [selectedKaryawan, setSelectedKaryawan] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const pageTitles = {
-    dashboard: 'Dashboard',
-    karyawan: 'Karyawan',
-    'karyawan-detail': selectedKaryawan ? selectedKaryawan.nama : 'Detail',
-    onboarding: 'Onboarding',
-    promosi: 'Kandidat Promosi',
-    flags: 'Flags & Alerts',
-    riset: 'Riset Materi',
-    laporan: 'Laporan',
-    settings: 'Settings',
-  };
-
-  const renderPage = () => {
-    switch (page) {
-      case 'dashboard': return <DashboardPage setPage={setPage} setSelectedKaryawan={setSelectedKaryawan} />;
-      case 'karyawan': return <KaryawanPage setPage={setPage} setSelectedKaryawan={setSelectedKaryawan} />;
-      case 'karyawan-detail': return <KaryawanDetailPage karyawan={selectedKaryawan} setPage={setPage} />;
-      case 'onboarding': return <OnboardingPage />;
-      case 'promosi': return <PromosiPage />;
-      case 'flags': return <FlagsPage />;
-      case 'riset': return <RisetPage />;
-      case 'laporan': return <LaporanPage />;
-      case 'settings': return <SettingsPage />;
-      default: return <DashboardPage setPage={setPage} setSelectedKaryawan={setSelectedKaryawan} />;
-    }
-  };
-
-  return (
-    <div className="flex h-screen overflow-hidden" style={{ background: colors.sand, fontFamily: "'Inter Tight', system-ui, sans-serif" }}>
-      <DesktopSidebar currentPage={page} setPage={setPage} />
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} currentPage={page} setPage={setPage} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar pageTitle={pageTitles[page]} onMenuClick={() => setDrawerOpen(true)} onBack={() => setPage('karyawan')} showBack={page === 'karyawan-detail'} />
-        <div className="flex-1 overflow-y-auto">{renderPage()}</div>
-      </div>
-      <MobileBottomNav currentPage={page} setPage={setPage} />
-    </div>
-  );
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<BosAlungDashboard />);
-</script>
-
+  </main>
+</div>
+<script src="assets/app.js"></script>
 </body>
 </html>
