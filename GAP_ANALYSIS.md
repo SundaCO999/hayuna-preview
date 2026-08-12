@@ -193,18 +193,23 @@ mau ramai memang butuh bantuan bikin konten promo; itu kebutuhan klien, bukan ke
 **Status: DITAHAN.** Belum dibangun di produksi, dan belum saatnya dibahas. Tetap di
 preview sebagai gambaran arah, TAPI **jangan dipakai bahan jualan** sampai benar-benar ada.
 
-## B3. B-mini (monitor internal lintas tenant) 🟢 **SEBAGIAN SUDAH ADA**
+## B3. B-mini ❌ **DIHAPUS DARI PREVIEW** (Ko, 2026-07-27)
 
-**Di preview:** `bmini.html` → kesehatan sistem, agent online, anomali, eskalasi terbuka —
-lintas tenant, khusus Ko.
+**Keputusan Ko:** *"B-mini ini di produksinya admin console, tapi untuk di preview
+gak usah dulu, jadi hapus aja."*
 
-**Penilaian:** produksi **sudah punya sebagian**: `/portal/admin` (daftar tenant, health,
-log error berperingkat). Yang belum: tampilan "agent online 3/3" dan "anomali aktif".
+Jadi ini **bukan gap** — fungsinya memang sudah ada di produksi sebagai **panel admin**
+(`/portal/admin`: daftar tenant, perpanjang trial, comp, health, log error berperingkat).
+Yang salah cuma preview-nya: dia menggambarkannya sebagai **aplikasi terpisah**, padahal
+di produksi itu bagian dari portal.
 
-**Usul:** **jangan bikin aplikasi terpisah.** Lebur ke panel admin yang sudah ada.
-Menambah satu aplikasi lagi = satu lagi yang harus dijaga. Prioritas: sedang.
+**Dikerjakan:** `bmini.html` dihapus, plus semua yang menunjuk ke sana —
+tautan di `portal.html` (dua tempat) dan keterangan di `bos-hayuna-dashboard.html`.
+**Nol tautan mati** tersisa (dicek browser).
 
-## B4. Dashboard Bos Afung 🟡 **PERSONANYA MEMANG BELUM ADA**
+Bentuk produksinya tetap bisa dilihat di `portal-produksi.html` → menu **Panel admin**.
+
+## B4. Dashboard Bos Afung ⏸️ **DIKONFIRMASI BELUM DIBANGUN** — ✅ sudah dilabeli
 
 **Di preview:** Operasional Hari Ini · Shift · Checklist Ops.
 
@@ -212,20 +217,29 @@ Menambah satu aplikasi lagi = satu lagi yang harus dijaga. Prioritas: sedang.
 Afung sendiri berstatus **belum dibangun** — masih sambungan kosong Fase 2. Jadi preview
 menggambarkan sesuatu yang lebih maju dari kenyataan.
 
-**Usul:** **tahan.** Boleh disimpan sebagai gambaran arah, TAPI diberi label jelas
-"belum dibangun" supaya nol pernah dipakai jualan. Prioritas: rendah (Fase 2).
+**Ko mengonfirmasi 2026-07-27:** *"ya Afung memang belum dibangun, masih nunggu."*
 
-## B5. Mode gelap 🟢 **GAP NYATA, KECIL**
+**Dikerjakan:** spanduk `bos-afung-dashboard.html` diganti jadi peringatan tegas —
+*"BOS AFUNG BELUM DIBANGUN — masih sambungan kosong Fase 2. Halaman ini gambaran arah
+doang. JANGAN dipakai bahan jualan."* Halamannya tetap disimpan sebagai gambaran arah.
+
+## B5. Mode gelap ✅ **DIKONFIRMASI GAP PRODUKSI** (Ko, 2026-07-27)
 
 **Di preview:** tiap dashboard punya tombol terang/gelap, tersimpan di `localStorage`.
 
 **Penilaian:** produksi **nol punya sama sekali** — nol ada `data-theme`, nol ada
 `prefers-color-scheme`. Ini gap yang benar-benar preview lebih unggul.
 
-**Penilaian jujur:** pemilik warung memakai portal ini di dapur, siang hari, HP terang.
-Mode gelap **bukan** masalah yang mereka rasakan. Bagus, tapi bukan sekarang.
+**Ko mengonfirmasi 2026-07-27:** *"mode gelap ini gap production yang belum ada."*
 
-**Usul:** catat sebagai keinginan, kerjakan setelah ada klien yang memintanya. Prioritas: rendah.
+Jadi ini **satu-satunya butir Bagian B yang berdiri sebagai gap produksi sungguhan** —
+preview lebih unggul, dan produksi memang belum punya.
+
+**Catatan saya yang tetap berlaku:** pemilik warung memakai portal ini di dapur, siang
+hari, layar terang. Mode gelap nyata kurangnya, tapi **bukan yang paling mereka rasakan**.
+Dicatat sebagai gap terbuka; waktu pengerjaannya keputusan Ko.
+
+**Preview tetap memegang mode gelap** — jadi acuannya sudah ada kalau nanti dibangun.
 
 ## B6. Melihat isi percakapan pelanggan ❌ **DIBUANG** — diganti gagasan yang lebih baik
 
@@ -249,15 +263,22 @@ satu — jadi lebih aman dari sisi data pribadi.
 **Status:** dicatat sebagai **permintaan baru**, bukan lanjutan B6. Perlu diputuskan
 PM/Ko, dan perlu dipastikan dulu datanya memang tersimpan cukup untuk dikelompokkan.
 
-## B7. Analisis konsumsi bahan 🟢 **GAP NYATA, SEDANG**
+## B7. Analisis konsumsi bahan ✅ **DISESUAIKAN KE PRODUKSI** (Ko, 2026-07-27)
 
-**Di preview:** `budi-dashboard.html` → menu "Konsumsi".
+**Keputusan Ko:** *"sesuaikan dengan produksi yang sudah live."*
 
-**Penilaian:** produksi punya **riwayat gerakan stok** (daftar kejadian), tapi nol punya
-rangkuman *"bahan ini habis berapa per minggu"*. Padahal datanya sudah ada — tinggal
-dihitung.
+Jadi bukan dibangun di produksi — **preview-nya yang diluruskan**. Menu "Konsumsi" di
+`budi-dashboard.html` berisi grafik konsumsi 7 hari yang **nol ada padanannya** di
+produksi. Itu karangan preview, dan karangan begini yang bikin orang salah sangka.
 
-**Usul:** layak, murah, dan langsung kepakai untuk memperkirakan belanja. Prioritas: sedang.
+**Diganti dengan yang BENERAN jalan** di halaman Stok produksi (`core/portal_stok.py`):
+
+| Menu preview | Isi sekarang |
+|---|---|
+| ~~Konsumsi~~ → **Belanja &amp; Opname** | catat belanja masuk (satuan otomatis dikonversi, bulk = satu konfirmasi) · opname &amp; koreksi belanja (jejak nol dihapus) · kelola supplier · ubah satuan |
+
+Gagasan "rangkuman konsumsi bahan" sendiri **belum ada di produksi**. Kalau suatu saat mau
+dibangun, itu permintaan baru — bukan sesuatu yang preview boleh tampilkan lebih dulu.
 
 ## B8. Bagan struktur organisasi AI ❌ **DIBUANG**
 
@@ -294,18 +315,21 @@ Nol dikerjakan, nol dibawa ke materi jualan.
 4. Halaman produksi yang belum ada, ditambahkan ke preview.
 
 ### Menunggu keputusan Ko (Bagian B)
-| # | Usul | Prioritas | Keputusan Ko |
+| # | Usul | Keputusan Ko (2026-07-27) | Status |
 |---|---|---|---|
-| B1 | Buang Konektor POS dari preview | — | ✅ **selesai 2026-07-27** |
-| A5 | Chat di dalam dashboard (kelewat, lalu dikoreksi) | — | ✅ **selesai 2026-07-27** |
-| B6 | Lihat isi percakapan Cici | — | ❌ **dibuang** — "cuma jadi spam dashboard" |
-| **BARU** | **Rekap TOPIK yang sering ditanya** calon/customer klien | perlu dibahas | ⬜ permintaan Ko, ganti B6 |
-| B8 | Bagan struktur AI buat materi jualan | — | ❌ **dibuang** |
-| B2 | Dashboard Marketing (agen PRODUK, bukan alat BO) | — | ⏸️ **ditahan** — belum dibuat |
-| B3 | Lebur B-mini ke panel admin | sedang | ⬜ |
-| B7 | Rangkuman konsumsi bahan | sedang | ⬜ |
-| B4 | Afung — tahan, beri label "belum dibangun" | rendah | ⬜ |
-| B5 | Mode gelap | rendah | ⬜ |
+| B1 | Konektor POS | ⛔ buang — garis merah | ✅ selesai |
+| A5 | Chat di dalam dashboard *(kelewat, ditangkap Ko)* | pasang | ✅ selesai |
+| B3 | B-mini | hapus dari preview — di produksi = panel admin | ✅ selesai |
+| B7 | Konsumsi bahan | sesuaikan ke produksi yang live | ✅ selesai |
+| B4 | Bos Afung | konfirmasi belum dibangun, kasih label | ✅ selesai |
+| B6 | Lihat isi percakapan Cici | ❌ buang — "cuma jadi spam dashboard" | ✅ selesai |
+| B8 | Bagan struktur AI | ❌ buang | ✅ selesai |
+| B2 | Dashboard Marketing *(agen PRODUK, analisis saya salah)* | ⏸️ tahan — belum dibuat | — |
+| B5 | Mode gelap | ✅ diakui **gap produksi** yang belum ada | ⬜ nunggu waktu |
+| **BARU** | **Rekap TOPIK yang sering ditanya** calon/customer | permintaan Ko, pengganti B6 | ⬜ perlu dibahas |
+
+**Sisa yang benar-benar terbuka tinggal dua:** mode gelap (B5) dan rekap topik (baru).
+Delapan butir lain sudah tuntas.
 
 ### Batas jujur laporan ini
 - Produksi dibaca dari **kode**, bukan dari layar yang benar-benar jalan. Ada kodenya
