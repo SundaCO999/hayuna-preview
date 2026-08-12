@@ -97,7 +97,37 @@ ambang kelulusan, jadwal).
 | "Login: username / password" | Google OAuth **atau** email+password, satu pintu |
 | Nol ada Koko | **Koko** = agen penjualan (R50), Budi jadi stok-saja |
 
-### A5. Bahasa desain
+### A5. Chat DI DALAM dashboard 🔴 **KELEWAT DI LAPORAN PERTAMA — dikoreksi Ko**
+
+> **Koreksi jujur:** di terbitan pertama laporan ini, chat ditulis di Bagian B9 sebagai
+> *"sudah ada padanannya"*. **Itu salah.** Ko yang menangkapnya. Yang saya lakukan adalah
+> menyamakan dua hal yang bentuknya beda — dan justru bedanya itu intinya.
+
+| | Preview | Produksi |
+|---|---|---|
+| Bentuk | `chat.html` — **halaman tersendiri**, semboyannya *"skip dashboard, langsung ngobrol"* | **widget mengambang di SETIAP halaman** portal |
+| Cara sampai | pindah halaman dulu | tinggal pencet, nol pindah dari halaman yang sedang dibuka |
+| Nama | "Hayuna" | **"Hana"** |
+| Isi | bebas | perintah kerja: *jual kopi susu 2 · belanja gula 2kg 30rb · cek stok gula · rekap hari ini* |
+
+**Kenapa bedanya penting.** Preview memaksa pemilik **memilih**: mau lihat dashboard, atau
+mau ngobrol. Produksi nol memaksa apa pun — dia bisa lagi melihat halaman Stok, lalu
+langsung menyuruh "belanja gula 2kg 30rb" tanpa berpindah ke mana-mana. Perintahnya masuk
+ke **jalur yang sama persis** dengan chat Telegram, lengkap dengan konfirmasi
+"Bener? ya/batal" sebelum apa pun dicatat.
+
+Ini yang di kode produksi sendiri diberi nama **"gap I"** (`core/portal_chat.py`) — jadi
+memang disadari sebagai kekurangan penting, dan sudah ditutup di sana, tapi nol tercermin
+di preview.
+
+**Batas jujur yang ikut disalin ke preview:** di web **nol ada obrolan bebas** — cuma
+perintah kerja yang deterministik. Obrolan bebas tetap di Telegram. Ini ditulis apa adanya
+di dalam widget, bukan disembunyikan.
+
+**Status:** ✅ sudah dipasang di `portal-produksi.html`, mengambang di semua halaman,
+persis seperti produksi.
+
+### A6. Bahasa desain
 
 | | Preview | Produksi |
 |---|---|---|
@@ -134,21 +164,34 @@ sekali ada calon klien melihatnya, dia akan menganggap itu janji.
 
 **Usul:** **buang dari preview.** Bukan ditunda — dibuang.
 
-## B2. Dashboard Marketing 🟡 **SALAH KANTOR**
+## B2. Dashboard Marketing 🟡 **DITAHAN** — analisis saya SALAH, dikoreksi Ko
+
+> **Koreksi Ko 2026-07-27:** *"ini marketing untuk klien, ini tahan dulu, masih belum
+> dibuat. Harus bisa bedakan agent product, dengan agent yang kerja buat product."*
 
 **Di preview:** `marketing-dashboard.html` → Marketing · Generator Konten · Campaign.
 
-**Penilaian:** ini bukan fitur yang dipakai klien warung — ini alat **Ko sendiri** untuk
-menjual Hayuna. Menaruhnya di dalam produk berarti tiap klien melihat menu yang nol ada
-gunanya buat dia.
+**Kesalahan saya.** Saya menyimpulkan ini alat jualan Ko sendiri, lalu mengusulkan
+memindahkannya ke BO Console. Salah. Ini **agen produk** — yang membantu **klien**
+memasarkan warungnya. Tempatnya memang di dalam produk.
 
-Ditambah: "Generator Konten" artinya LLM menulis materi jualan. Melihat masalah yang baru
-saja terjadi (klaim belum terverifikasi bocor ke website), fitur yang **mengarang materi
-promosi otomatis** justru yang paling rawan sekarang.
+**Beda yang saya kaburkan — dan ini pembeda penting:**
 
-**Usul:** **pindahkan ke BO Console**, bukan ke produk. Di sana sudah ada tab Growth dan
-Eskalasi — marketing adalah tetangganya. Prioritas: rendah, dan wajib ada persetujuan
-manusia sebelum apa pun terbit.
+| | Agen PRODUK | Agen yang kerja BUAT produk |
+|---|---|---|
+| Bekerja untuk | usaha si klien | Hayuna sendiri |
+| Tinggal di | portal klien (HayunaSystem) | BO Console |
+| Contoh | Koko, Budi, Wulan, Cici, **Marketing** | mesin cari prospek, eskalasi chat website |
+
+Dua-duanya bisa disebut "marketing", dan itu yang membuat saya keliru. Yang membedakan
+bukan namanya — tapi **siapa yang jadi untung dari pekerjaannya**.
+
+**Kenapa saya keliru:** saya menilai dari isinya ("generator konten") lalu menebak
+pemakainya. Yang benar dibalik — tentukan dulu siapa pemakainya, baru dinilai. Warung yang
+mau ramai memang butuh bantuan bikin konten promo; itu kebutuhan klien, bukan kebutuhan Ko.
+
+**Status: DITAHAN.** Belum dibangun di produksi, dan belum saatnya dibahas. Tetap di
+preview sebagai gambaran arah, TAPI **jangan dipakai bahan jualan** sampai benar-benar ada.
 
 ## B3. B-mini (monitor internal lintas tenant) 🟢 **SEBAGIAN SUDAH ADA**
 
@@ -184,20 +227,27 @@ Mode gelap **bukan** masalah yang mereka rasakan. Bagus, tapi bukan sekarang.
 
 **Usul:** catat sebagai keinginan, kerjakan setelah ada klien yang memintanya. Prioritas: rendah.
 
-## B6. Melihat isi percakapan pelanggan 🟢 **GAP NYATA, LAYAK**
+## B6. Melihat isi percakapan pelanggan ❌ **DIBUANG** — diganti gagasan yang lebih baik
 
-**Di preview:** `cici-dashboard.html` → "Percakapan" + "Aktivitas Harian".
+**Keputusan Ko 2026-07-27:** *"buang aja, yang ada hanya spam dashboard nanti. Yang
+diperlukan adalah rekapan topik yang sering ditanya oleh calon/customer klien."*
 
-**Penilaian:** produksi cuma punya **Eskalasi** — yaitu percakapan yang *gagal*. Yang
-berhasil nol bisa dilihat sama sekali.
+**Kenapa usul saya kurang tepat.** Saya mengusulkan halaman berisi transkrip percakapan.
+Untuk warung yang ramai itu jadi **tumpukan yang nol pernah dibaca** — makin banyak
+pelanggan, makin nol berguna. Menambah halaman yang nol dibaca itu bukan menambah nilai,
+cuma menambah yang harus dijaga.
 
-Ini gap yang **paling layak dikerjakan** dari seluruh Bagian B. Alasannya: pemilik nol
-punya cara tahu Cici menjawab apa ke pelanggannya. Itu masalah kepercayaan — dan
-kepercayaan adalah hal yang paling sulit dijual dari produk AI. Sekarang pemilik diminta
-percaya pada sesuatu yang nol bisa dia periksa.
+**Yang sebenarnya dibutuhkan: REKAP TOPIK.** Bukan "siapa bilang apa", tapi *"minggu ini
+23 orang menanyakan jam buka, 11 menanyakan menu tanpa pedas, 8 menanyakan pesan
+banyak"*. Itu **memampatkan** alih-alih menumpuk — dan langsung bisa ditindaklanjuti:
+topik yang sering muncul berarti jawabannya perlu masuk FAQ Cici, atau justru menandakan
+peluang menu baru.
 
-**Usul:** **bangun** — halaman baca-saja berisi percakapan Cici. Prioritas: **tinggi**,
-tapi tetap keputusan PM/Ko, bukan BO Dev.
+**Kelebihan lain:** rekap topik nol perlu menampilkan isi percakapan pelanggan satu per
+satu — jadi lebih aman dari sisi data pribadi.
+
+**Status:** dicatat sebagai **permintaan baru**, bukan lanjutan B6. Perlu diputuskan
+PM/Ko, dan perlu dipastikan dulu datanya memang tersimpan cukup untuk dikelompokkan.
 
 ## B7. Analisis konsumsi bahan 🟢 **GAP NYATA, SEDANG**
 
@@ -209,27 +259,29 @@ dihitung.
 
 **Usul:** layak, murah, dan langsung kepakai untuk memperkirakan belanja. Prioritas: sedang.
 
-## B8. Bagan struktur organisasi AI 🟢 **KECIL, TAPI KUAT UNTUK JUALAN**
+## B8. Bagan struktur organisasi AI ❌ **DIBUANG**
 
-**Di preview:** `portal.html` menampilkan bagan — Bos Hayuna (GM) di puncak, tiap persona
-mengurus departemennya, bisa diklik.
+**Keputusan Ko 2026-07-27:** nol usah.
 
-**Penilaian:** produksi cuma menampilkan daftar "Karyawan AI kamu" di beranda. Bagan
-preview **jauh lebih menjelaskan** apa yang sebenarnya dibeli orang: bukan satu bot, tapi
-sebuah tim.
-
-**Usul:** ini gagasan terbaik di preview. Pakai di **materi jualan** dulu (murah, nol
-risiko), baru dipertimbangkan masuk portal. Prioritas: rendah untuk produk, **tinggi untuk
-marketing**.
+Nol dikerjakan, nol dibawa ke materi jualan.
 
 ## B9–B11. Sisanya — sudah ada padanannya di produksi
 
 | Preview | Padanan produksi | Vonis |
 |---|---|---|
 | Bos Hayuna: "Ringkasan Bisnis" | Beranda | sudah ada |
-| Bos Hayuna: "Tanya GM" | `POST /portal/chat` + "Tanya Hayuna" di beranda | sudah ada |
+| Bos Hayuna: "Tanya GM" | widget "Tanya Hana" mengambang di tiap halaman | ⚠️ **BARIS INI YANG BIKIN KELEWAT — lihat A5.** Saya menulis "sudah ada" padahal bentuknya beda jauh, dan bedanya itu justru gapnya. |
 | Cici: "Knowledge Loop" | FAQ + unggah dokumen | sudah ada |
 | Alung: Kandidat/Promosi/Schedule | `/portal/alung/*` (puluhan aksi) | **produksi jauh lebih lengkap** |
+
+> **Pelajaran dari kelewatnya A5.** Tabel "sudah ada padanannya" ini berbahaya: begitu
+> sesuatu masuk ke sini, dia berhenti diperiksa. Padahal "ada padanannya" ≠ "sama".
+> Chat ada di dua sisi — tapi di preview berupa halaman terpisah, di produksi berupa
+> widget di tiap halaman. Saya mencatat kesamaan namanya, bukan bedanya bentuknya.
+>
+> **Aturan untuk laporan berikutnya:** kalau dua hal cuma *mirip*, jangan ditulis
+> "sudah ada" — tulis apa persisnya yang beda. Yang mirip-tapi-beda justru lebih sering
+> jadi gap daripada yang jelas-jelas nol ada.
 
 ---
 
@@ -242,14 +294,16 @@ marketing**.
 4. Halaman produksi yang belum ada, ditambahkan ke preview.
 
 ### Menunggu keputusan Ko (Bagian B)
-| # | Usul | Prioritas | Keputusan |
+| # | Usul | Prioritas | Keputusan Ko |
 |---|---|---|---|
 | B1 | Buang Konektor POS dari preview | — | ✅ **selesai 2026-07-27** |
-| B6 | Halaman lihat percakapan Cici | tinggi | ⬜ |
-| B8 | Bagan struktur AI buat materi jualan | tinggi (marketing) | ⬜ |
+| A5 | Chat di dalam dashboard (kelewat, lalu dikoreksi) | — | ✅ **selesai 2026-07-27** |
+| B6 | Lihat isi percakapan Cici | — | ❌ **dibuang** — "cuma jadi spam dashboard" |
+| **BARU** | **Rekap TOPIK yang sering ditanya** calon/customer klien | perlu dibahas | ⬜ permintaan Ko, ganti B6 |
+| B8 | Bagan struktur AI buat materi jualan | — | ❌ **dibuang** |
+| B2 | Dashboard Marketing (agen PRODUK, bukan alat BO) | — | ⏸️ **ditahan** — belum dibuat |
 | B3 | Lebur B-mini ke panel admin | sedang | ⬜ |
 | B7 | Rangkuman konsumsi bahan | sedang | ⬜ |
-| B2 | Pindahkan Marketing ke BO Console | rendah | ⬜ |
 | B4 | Afung — tahan, beri label "belum dibangun" | rendah | ⬜ |
 | B5 | Mode gelap | rendah | ⬜ |
 
