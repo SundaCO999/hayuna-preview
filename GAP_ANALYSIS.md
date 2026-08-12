@@ -117,9 +117,15 @@ Produksi mengunci ini sebagai **Design v1.0 / R59**. Preview memakai palet yang 
 > Arahan Ko: **jangan sentuh produksi.** Ini analisis + usulan saja.
 > Tiap butir dinilai: apakah layak dibangun, dan apa risikonya.
 
-## B1. Konektor POS ⛔ **JANGAN DIBANGUN**
+## B1. Konektor POS ⛔ **JANGAN DIBANGUN** — ✅ SUDAH DIBUANG (Ko, 2026-07-27)
 
-**Di preview:** `transaksi-dashboard.html` → menu "Konektor POS".
+> **Selesai.** Ko menyetujui usul ini dan seluruh jejaknya sudah dibuang dari preview:
+> menu sidebar + halaman "Konektor POS" (Moka, Pawoon/Olsera, webhook custom) di
+> `transaksi-dashboard.html`, kartu metrik "Sumber: POS", butir "Konektor POS" di daftar
+> paket `billing.html`, dan kalimat "POS nyusul" di `portal.html`, `index.html`,
+> `landing.html`. **Nol sebutan POS tersisa di seluruh preview.**
+
+**Di preview (dulu):** `transaksi-dashboard.html` → menu "Konektor POS".
 
 **Penilaian:** ini menabrak **garis merah** yang masih berlaku. Aturan produk menyebut
 integrasi POS/mesin kasir *"nol ada di rencana"*, dan chat website sudah dipagari untuk
@@ -238,7 +244,7 @@ marketing**.
 ### Menunggu keputusan Ko (Bagian B)
 | # | Usul | Prioritas | Keputusan |
 |---|---|---|---|
-| B1 | Buang Konektor POS dari preview | **kerjakan sekarang** | ⬜ |
+| B1 | Buang Konektor POS dari preview | — | ✅ **selesai 2026-07-27** |
 | B6 | Halaman lihat percakapan Cici | tinggi | ⬜ |
 | B8 | Bagan struktur AI buat materi jualan | tinggi (marketing) | ⬜ |
 | B3 | Lebur B-mini ke panel admin | sedang | ⬜ |
