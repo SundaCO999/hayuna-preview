@@ -6,7 +6,7 @@
 <title>Budi — Hayuna AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('hy-theme')||''}catch(e){}</script>
 </head>
@@ -23,7 +23,7 @@
       <a class="sidebar-item" data-view="stok" data-title="Stok Aktual"><span class="sidebar-item-icon">📦</span> Stok Aktual</a>
       <a class="sidebar-item" data-view="txn" data-title="Transaksi"><span class="sidebar-item-icon">📋</span> Transaksi</a>
       <a class="sidebar-item" data-view="low" data-title="Stok Menipis"><span class="sidebar-item-icon">⚠️</span> Stok Menipis</a>
-      <a class="sidebar-item" data-view="kons" data-title="Konsumsi"><span class="sidebar-item-icon">📊</span> Konsumsi</a>
+      <a class="sidebar-item" data-view="kons" data-title="Belanja &amp; Opname"><span class="sidebar-item-icon">🧾</span> Belanja &amp; Opname</a>
     </nav>
     <div class="sidebar-foot"><div class="tenant-pill"><span class="tenant-pill-label">Tenant</span><span class="tenant-pill-name">hayuna-demo</span></div></div>
   </aside>
@@ -157,22 +157,53 @@
 
       <!-- KONSUMSI -->
       <section id="view-kons" class="view">
-        <div class="content-actions" style="margin-bottom:16px;">
-          <button class="btn btn-primary">7 hari</button><button class="btn">14 hari</button><button class="btn">30 hari</button>
-        </div>
+        <!-- DISESUAIKAN KE PRODUKSI 2026-07-27 (keputusan Ko).
+             Dulu di sini ada grafik "Konsumsi 7 hari" — fitur itu NOL ADA di
+             produksi, jadi dibuang. Diganti kemampuan yang BENERAN jalan di
+             halaman Stok produksi (core/portal_stok.py). -->
         <div class="panel panel-full">
-          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">📊</span> Konsumsi (7 hari)</div></div>
+          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">🧾</span> Catat belanja masuk</div><span class="phase phase-now">live</span></div>
           <div class="panel-body">
-            <div style="display:flex;align-items:flex-end;gap:10px;height:200px;padding:10px 4px;">
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:60%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:75%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:50%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:90%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:68%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:82%;"></div>
-              <div style="flex:1;background:var(--agent-budi);border-radius:4px 4px 0 0;height:71%;"></div>
+            <table class="tbl">
+              <thead><tr><th>Tanggal</th><th>Bahan</th><th>Jumlah</th><th>Harga/sat</th><th>Supplier</th></tr></thead>
+              <tbody>
+                <tr><td>26 Jul</td><td class="cell-strong">Gula pasir</td><td>10 kg</td><td>Rp 14.000</td><td>Toko Berkah</td></tr>
+                <tr><td>25 Jul</td><td class="cell-strong">Susu full cream</td><td>24 L</td><td>Rp 18.500</td><td>Sumber Jaya</td></tr>
+                <tr><td>24 Jul</td><td class="cell-strong">Biji kopi arabica</td><td>5 kg</td><td>Rp 145.000</td><td>Kopi Tani</td></tr>
+              </tbody>
+            </table>
+            <div class="flow-note" style="margin-top:12px;">Satuan otomatis dikonversi. Belanja banyak barang sekaligus cukup <strong>satu konfirmasi</strong> (belanja cepat / bulk).</div>
+          </div>
+        </div>
+
+        <div class="panels" style="margin-top:16px;">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">⚖️</span> Opname &amp; koreksi</div><span class="phase phase-now">live</span></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Bahan</th><th>Tercatat</th><th>Hasil hitung</th><th>Selisih</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-strong">Gula pasir</td><td>12 kg</td><td>11,4 kg</td><td class="c-dim">−0,6</td></tr>
+                  <tr><td class="cell-strong">Cup 16oz</td><td>180</td><td>176</td><td class="c-dim">−4</td></tr>
+                </tbody>
+              </table>
+              <div class="flow-note" style="margin-top:10px;">Belanja yang salah catat bisa dikoreksi — jejaknya <strong>nol dihapus</strong>.</div>
             </div>
-            <div class="cell-dim" style="text-align:center;margin-top:8px;">Total keluar per hari (mockup — chart statis)</div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">🚚</span> Supplier &amp; satuan</div><span class="phase phase-now">live</span></div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Supplier</th><th>Bahan disuplai</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-strong">Toko Berkah</td><td>gula, tepung, minyak</td></tr>
+                  <tr><td class="cell-strong">Sumber Jaya</td><td>susu, telur</td></tr>
+                  <tr><td class="cell-strong">Kopi Tani</td><td>biji kopi</td></tr>
+                </tbody>
+              </table>
+              <div class="flow-note" style="margin-top:10px;">Satuan bahan bisa diubah belakangan (mis. gram → kg) tanpa mengacak riwayat.</div>
+            </div>
           </div>
         </div>
       </section>

@@ -6,7 +6,7 @@
 <title>Transaksi / Order — Hayuna AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('hy-theme')||''}catch(e){}</script>
 </head>
@@ -21,7 +21,6 @@
     <nav class="sidebar-nav">
       <a class="sidebar-item active" data-view="dashboard" data-title="Transaksi / Order"><span class="sidebar-item-icon">▦</span> Dashboard</a>
       <a class="sidebar-item" data-view="orders" data-title="Daftar Order"><span class="sidebar-item-icon">🧾</span> Daftar Order</a>
-      <a class="sidebar-item" data-view="pos" data-title="Konektor POS"><span class="sidebar-item-icon">🔌</span> Konektor POS</a>
     </nav>
     <div class="sidebar-foot"><div class="tenant-pill"><span class="tenant-pill-label">Tenant</span><span class="tenant-pill-name">hayuna-demo</span></div></div>
   </aside>
@@ -47,14 +46,14 @@
 
     <div class="content-main">
       <section id="view-dashboard" class="view active">
-        <div class="flow-note">🔗 <strong>Aturan emas:</strong> modul gak saling panggil. Order ditulis ke domain Transaksi → <strong>Budi</strong> baca buat potong stok, <strong>Wulan</strong> baca buat income, <strong>Bos Hayuna (GM)</strong> baca buat ringkasan. Order masuk dari <strong>Cici (chat)</strong> sekarang; <strong>POS via adapter API</strong> nyusul.</div>
+        <div class="flow-note">🔗 <strong>Aturan emas:</strong> modul gak saling panggil. Order ditulis ke domain Transaksi → <strong>Budi</strong> baca buat potong stok, <strong>Wulan</strong> baca buat income, <strong>Bos Hayuna (GM)</strong> baca buat ringkasan. Order masuk dari <strong>Cici (chat)</strong>.</div>
 
         <div class="summary-row">
           <div class="metric"><div class="metric-label">Penjualan Hari Ini</div><div class="metric-value c-green">Rp 3,48jt</div><div class="metric-sub">+12% vs kemarin</div></div>
           <div class="metric"><div class="metric-label">Order</div><div class="metric-value">84</div><div class="metric-sub">6 open di dapur</div></div>
           <div class="metric"><div class="metric-label">Rata² / Order</div><div class="metric-value c-blue">Rp 41rb</div><div class="metric-sub">AOV</div></div>
           <div class="metric"><div class="metric-label">Sumber: Chat</div><div class="metric-value">84</div><div class="metric-sub">via Cici</div></div>
-          <div class="metric"><div class="metric-label">Sumber: POS</div><div class="metric-value c-dim">0</div><div class="metric-sub">adapter nyusul</div></div>
+          
         </div>
 
         <div class="panels">
@@ -104,23 +103,6 @@
         </div>
       </section>
 
-      <section id="view-pos" class="view">
-        <div class="panel panel-full" style="max-width:680px;">
-          <div class="panel-header"><div class="panel-title"><span class="panel-title-icon">🔌</span> Konektor POS</div><span class="phase phase-vision">vision</span></div>
-          <div class="panel-body">
-            <div class="flow-note">Domain Transaksi dibikin <strong>channel-agnostic</strong> sejak awal. POS eksternal kirim webhook → dinormalisasi → ditulis ke domain Transaksi yang sama. Budi/Wulan/GM gak peduli order datang dari chat atau POS.</div>
-            <table class="tbl">
-              <thead><tr><th>POS / Channel</th><th>Status</th><th></th></tr></thead>
-              <tbody>
-                <tr><td class="cell-strong">Cici (chat Telegram)</td><td><span class="badge badge-green">TERHUBUNG</span></td><td class="cell-dim">aktif</td></tr>
-                <tr><td class="cell-strong">Moka POS</td><td><span class="badge badge-gray">BELUM</span></td><td><button class="btn" data-stub="Hubungkan POS">Hubungkan</button></td></tr>
-                <tr><td class="cell-strong">Pawoon / Olsera</td><td><span class="badge badge-gray">BELUM</span></td><td><button class="btn" data-stub="Hubungkan POS">Hubungkan</button></td></tr>
-                <tr><td class="cell-strong">Webhook custom (API)</td><td><span class="badge badge-gray">BELUM</span></td><td><button class="btn" data-stub="Setup webhook">Setup</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
     </div>
   </main>
 </div>

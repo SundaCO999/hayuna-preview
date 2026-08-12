@@ -1,35 +1,42 @@
 /*
- * HAYUNA AI — Preview/Mockup stylesheet (v2-2026-06-01)
+ * HAYUNA AI — Preview/Mockup stylesheet (v3-2026-07-27)
  *
- * Self-contained. Token + shell disalin & diselaraskan dari
- * 01_PRODUCTS/_shared/css/hayuna-tokens.css (single source of truth, locked 2026-05-26),
- * plus tambahan metric/panel/portal/status untuk kebutuhan mockup.
+ * DISAMAKAN KE PRODUKSI 2026-07-27. Sumber token: core/portal_shell.py di repo
+ * HayunaSystem — "Design system TERKUNCI (Design v1.0 / R59): Plus Jakarta Sans
+ * + palet green #3E8E72 / deep #27352E / amber #E8A23D / mint #CFE9DD /
+ * cream #FBF8F2".
+ *
+ * Palet lama preview (teal #0F4C5C + terracotta #D4823A, dikunci 2026-05-26)
+ * SUDAH TIDAK DIPAKAI produksi. Nama variabelnya sengaja DIPERTAHANKAN supaya
+ * seluruh halaman ikut berubah tanpa perlu disentuh satu-satu — cuma nilainya
+ * yang diganti.
  *
  * MOCKUP ONLY — data dummy, tidak wired ke backend.
  */
 
 :root {
-  /* ── Palette (locked) ── */
-  --color-primary: #0F4C5C;
-  --color-primary-light: #1A6B7C;
-  --color-primary-dark: #08323D;
-  --color-sand: #FBF7F2;
-  --color-sand-dark: #F0E9DD;
-  --color-terracotta: #D4823A;
-  --color-terracotta-light: #E89E5F;
-  --color-sage: #73A580;
-  --color-amber: #E6A817;
-  --color-brick: #B83A2A;
-  --color-text: #1A1A1A;
-  --color-text-muted: #6B6B6B;
-  --color-text-subtle: #999999;
-  --color-border: #E5E0D6;
-  --color-border-soft: #EFEAE0;
+  /* ── Palet PRODUKSI (Design v1.0 / R59) ── */
+  --color-primary: #3E8E72;        /* hijau Hayuna */
+  --color-primary-light: #4FA184;
+  --color-primary-dark: #2F6E58;
+  --color-sand: #FBF8F2;           /* krem — permukaan & sidebar */
+  --color-sand-dark: #DAD6CD;      /* latar halaman di produksi */
+  --color-terracotta: #E8A23D;     /* amber — aksen produksi */
+  --color-terracotta-light: #F0B968;
+  --color-sage: #3E8E72;
+  --color-amber: #E8A23D;
+  --color-brick: #B4453C;          /* merah produksi (tombol keluar) */
+  --color-text: #27352E;           /* deep — teks utama */
+  --color-text-muted: #6B655C;
+  --color-text-subtle: #9A9286;
+  --color-border: #E7E0D4;
+  --color-border-soft: #EFE7DA;
+  --color-mint: #CFE9DD;           /* mint — tint produksi */
   --color-white: #FFFFFF;
 
   /* ── Semantic ── */
-  --bg: var(--color-sand);
-  --bg-deep: var(--color-sand-dark);
+  --bg: var(--color-sand-dark);
+  --bg-deep: var(--color-sand);
   --surface: var(--color-white);
   --surface-2: var(--color-sand);
   --border: var(--color-border);
@@ -41,25 +48,27 @@
   --primary-light: var(--color-primary-light);
   --accent: var(--color-terracotta);
   --accent-light: var(--color-terracotta-light);
-  --success: var(--color-sage);
+  --success: var(--color-primary);
   --warning: var(--color-amber);
   --danger: var(--color-brick);
 
-  /* ── Agent brand ── */
-  --agent-budi: var(--color-sage);
-  --agent-cici: var(--color-primary);
-  --agent-bos-alung: var(--color-terracotta);
+  /* ── Warna persona ──
+     Produksi NOL memberi warna per-agent (satu portal, satu warna). Di preview
+     dipertahankan tipis buat pembeda visual, tapi semuanya turunan hijau. */
+  --agent-budi: #3E8E72;
+  --agent-cici: #2F6E58;
+  --agent-bos-alung: #E8A23D;
 
   /* ── Tints ── */
-  --tint-primary: rgba(15, 76, 92, 0.08);
-  --tint-terracotta: rgba(212, 130, 58, 0.12);
-  --tint-sage: rgba(115, 165, 128, 0.12);
-  --tint-amber: rgba(230, 168, 23, 0.12);
-  --tint-brick: rgba(184, 58, 42, 0.10);
+  --tint-primary: rgba(62, 142, 114, 0.10);
+  --tint-terracotta: rgba(232, 162, 61, 0.14);
+  --tint-sage: rgba(62, 142, 114, 0.12);
+  --tint-amber: rgba(232, 162, 61, 0.14);
+  --tint-brick: rgba(180, 69, 60, 0.10);
 
-  /* ── Typography ── */
-  --font-body: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* ── Huruf: produksi pakai SATU huruf, nol serif ── */
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
   /* ── Radius + shadow ── */
@@ -67,9 +76,9 @@
   --radius: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  --shadow-sm: 0 1px 3px rgba(15, 76, 92, 0.06);
-  --shadow: 0 4px 12px rgba(15, 76, 92, 0.08);
-  --shadow-lg: 0 12px 32px rgba(15, 76, 92, 0.14);
+  --shadow-sm: 0 1px 3px rgba(39, 53, 46, 0.06);
+  --shadow: 0 4px 12px rgba(39, 53, 46, 0.08);
+  --shadow-lg: 0 12px 32px rgba(39, 53, 46, 0.14);
 
   --green: var(--success); --amber: var(--warning); --red: var(--danger); --blue: var(--primary);
 }
