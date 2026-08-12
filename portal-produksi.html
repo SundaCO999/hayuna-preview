@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal (cermin produksi) — Hayuna AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  CERMIN PORTAL PRODUKSI — dibuat 2026-07-27.
+
+  Halaman ini SENGAJA meniru struktur & desain portal yang BENERAN jalan, bukan
+  membayangkan yang baru. Sumbernya kode di repo HayunaSystem:
+    · menu + shell + warna : core/portal_shell.py  (Design v1.0 / R59)
+    · daftar halaman       : core/portal.py        (_SHELL_ROUTES)
+
+  Bedanya dengan mockup lain di repo ini: mockup lama membayangkan TIAP PERSONA
+  punya dashboard sendiri. Produksi nol begitu — satu portal, satu menu, dan
+  personanya cuma jadi keterangan "dikelola siapa".
+
+  Data di sini dummy. Yang dijaga akurat = STRUKTUR dan TAMPILAN.
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#DAD6CD;color:#27352E;
+  -webkit-font-smoothing:antialiased;line-height:1.5;font-size:14px;padding:30px 16px}
+.banner{max-width:1180px;margin:0 auto 14px;background:#27352E;color:#FBF8F2;border-radius:12px;
+  padding:10px 16px;font-size:12.5px;font-weight:600}
+.banner b{color:#E8A23D}
+.app{display:grid;grid-template-columns:212px 1fr;min-height:760px;max-width:1180px;margin:0 auto;
+  background:#E9E7E2;border-radius:24px;box-shadow:0 1px 2px rgba(40,34,24,.04),0 12px 30px -16px rgba(40,34,24,.18);
+  align-items:start}
+.side{background:#FBF8F2;border-right:1px solid #E7E0D4;padding:20px 14px;display:flex;flex-direction:column;
+  position:sticky;top:30px;align-self:start;max-height:calc(100dvh - 60px);overflow-y:auto;border-radius:24px 0 0 24px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.brand .word{font-weight:800;font-size:18px;letter-spacing:.04em}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:11px;color:#6B655C;
+  font-weight:600;font-size:13.5px;text-decoration:none;cursor:pointer}
+.nav a svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav a:hover{background:#EAF4EF;color:#2F6E58}
+.nav a.on{background:#3E8E72;color:#fff}
+.nav a.parent{background:#EAF4EF;color:#2F6E58}
+.nav .grp{font-size:11px;font-weight:700;color:#A9A296;text-transform:uppercase;letter-spacing:.08em;padding:16px 11px 7px}
+.subnav{display:flex;flex-direction:column;gap:1px;margin:2px 0 2px 30px}
+.subnav a{padding:7px 11px;border-radius:9px;color:#6B655C;font-weight:600;font-size:12.5px;text-decoration:none;cursor:pointer}
+.subnav a:hover{background:#EAF4EF;color:#2F6E58}
+.subnav a.on{background:#CFE9DD;color:#2F6E58}
+.foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:11px;border-top:1px solid #EEE7DB}
+.foot .who{display:flex;align-items:center;gap:11px}
+.foot .av{width:32px;height:32px;border-radius:50%;background:#3E8E72;color:#fff;display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.foot .nm{font-weight:700;font-size:13px}.foot .sub{font-size:11px;color:#6B655C}
+.foot .logout{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:9px;
+  color:#B4453C;font-weight:600;font-size:12.5px;text-decoration:none}
+.foot .logout:hover{background:#FBEAE8}
+.foot .logout svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.9;fill:none;
+  stroke-linecap:round;stroke-linejoin:round}
+.main{padding:22px 28px 36px;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.crumb{font-size:13px;color:#6B655C;font-weight:600}
+.topbar .r{display:flex;align-items:center;gap:12px}
+.tenant{display:flex;align-items:center;gap:7px;background:#EAF4EF;color:#2F6E58;font-weight:600;
+  font-size:12.5px;padding:7px 13px;border-radius:999px}
+.tenant .dot{width:7px;height:7px;border-radius:50%;background:#3E8E72}
+.adminlink{font-size:12.5px;font-weight:700;color:#C08A2E;text-decoration:none;cursor:pointer}
+.phead{margin-bottom:18px}
+.phead h1{font-size:25px;font-weight:800;letter-spacing:-.01em}
+.phead .psub{font-size:13px;color:#6B655C;margin-top:3px}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:#FBF8F2;border:1px solid #E7E0D4;border-radius:16px;padding:16px 18px}
+.card h3{font-size:13px;font-weight:700;color:#6B655C;margin-bottom:7px}
+.big{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.muted{font-size:12.5px;color:#8B857A;margin-top:3px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.pill.ok{background:#DCEFE7;color:#2E7D63}
+.pill.warn{background:#FBEBCB;color:#B07A1E}
+.pill.off{background:#EFE7DA;color:#8B857A}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:#A9A296;
+  font-weight:700;padding:8px 10px;border-bottom:1px solid #E7E0D4}
+td{padding:10px;border-bottom:1px solid #EFE7DA}
+tr:last-child td{border-bottom:none}
+.sec{margin-top:22px}
+.sec h2{font-size:15px;font-weight:800;margin-bottom:10px}
+.btn{display:inline-block;background:#3E8E72;color:#fff;border:none;font-family:inherit;font-weight:700;
+  font-size:13px;border-radius:999px;padding:9px 16px;cursor:pointer;text-decoration:none}
+.btn.s{background:#fff;color:#27352E;border:1px solid #E7E0D4}
+.chk{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #EFE7DA;font-size:13.5px}
+.chk:last-child{border-bottom:none}
+.chk .b{width:19px;height:19px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;flex-shrink:0}
+.chk .b.y{background:#3E8E72;color:#fff}
+.chk .b.n{background:#EFE7DA;color:#A9A296}
+.view{display:none}.view.on{display:block}
+.note{background:#FBF8F2;border:1px dashed #CFC7B6;border-radius:14px;padding:14px 16px;font-size:13px;color:#6B655C;margin-top:16px}
+.note b{color:#27352E}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{position:static;max-height:none;border-radius:24px 24px 0 0;border-right:none;border-bottom:1px solid #E7E0D4}.g3,.g2{grid-template-columns:1fr}.main{padding:18px 16px 28px}}
+</style>
+</head>
+<body>
+
+<div class="banner">CERMIN PORTAL PRODUKSI · data dummy — <b>struktur &amp; desain diambil dari kode HayunaSystem</b>, bukan rancangan baru</div>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 48 48">
+        <path d="M24 4 C14 12 12 30 24 44 C36 30 34 12 24 4 Z" fill="#3E8E72"/>
+        <path d="M24 9 V40 M24 17 L31 13 M24 17 L17 13 M24 24 L32 21 M24 24 L16 21 M24 31 L30 29 M24 31 L18 29"
+              stroke="#CFE9DD" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="word">hayuna</span>
+    </div>
+
+    <nav class="nav">
+      <a data-v="beranda" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Beranda</a>
+
+      <div class="grp">Karyawan AI</div>
+      <a data-v="penjualan"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6"/></svg>Penjualan</a>
+      <a data-v="stok"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>Stok</a>
+      <a data-v="keuangan"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>Keuangan</a>
+      <a data-v="pelanggan"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12 7.6L3 21l1.9-6A8.4 8.4 0 1 1 21 11.5z"/></svg>Pelanggan</a>
+      <a data-v="tim"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/></svg>Tim</a>
+      <div class="subnav" id="subtim" style="display:none">
+        <a data-v="tim" class="on">Ringkasan</a>
+        <a data-v="tim-rekrutmen">Rekrutmen</a>
+        <a data-v="tim-training">Training</a>
+      </div>
+      <a data-v="operasional"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Operasional</a>
+      <a data-v="pengaturan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Pengaturan</a>
+    </nav>
+
+    <div class="foot">
+      <div class="who">
+        <div class="av">RD</div>
+        <div><div class="nm">Ko Richard</div><div class="sub">Warung Demo</div></div>
+      </div>
+      <a class="logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">Beranda</div>
+      <div class="r">
+        <a class="adminlink" data-v="admin">🛠️ Panel admin</a>
+        <span class="tenant"><span class="dot"></span>Warung Demo</span>
+      </div>
+    </div>
+
+    <div class="phead"><h1 id="ptitle">Beranda</h1><div class="psub" id="psub">Ringkasan hari ini</div></div>
+
+    <!-- ── BERANDA ── -->
+    <section class="view on" data-view="beranda">
+      <div class="grid g3">
+        <div class="card"><h3>Penjualan hari ini</h3><div class="big">Rp 1.240.000</div><div class="muted">32 transaksi</div></div>
+        <div class="card"><h3>Laba bersih (bulan)</h3><div class="big">Rp 8.150.000</div><div class="muted">metode rata-rata tertimbang · <span class="pill warn">beta</span></div></div>
+        <div class="card"><h3>Perlu perhatian</h3><div class="big">3</div><div class="muted">2 stok menipis · 1 eskalasi</div></div>
+      </div>
+
+      <div class="sec grid g2">
+        <div class="card">
+          <h3>Setup awal — 3/5 selesai</h3>
+          <div class="chk"><span class="b y">✓</span>Isi nama usaha</div>
+          <div class="chk"><span class="b y">✓</span>Sambungkan Telegram</div>
+          <div class="chk"><span class="b y">✓</span>Tambah bahan pertama</div>
+          <div class="chk"><span class="b n">3</span>Buat menu + resep</div>
+          <div class="chk"><span class="b n">4</span>Catat penjualan pertama</div>
+        </div>
+        <div class="card">
+          <h3>Karyawan AI kamu</h3>
+          <div class="chk"><span class="b y">K</span>Koko — penjualan &amp; menu <span class="pill ok" style="margin-left:auto">aktif</span></div>
+          <div class="chk"><span class="b y">B</span>Budi — stok <span class="pill ok" style="margin-left:auto">aktif</span></div>
+          <div class="chk"><span class="b y">W</span>Wulan — keuangan <span class="pill ok" style="margin-left:auto">aktif</span></div>
+          <div class="chk"><span class="b y">C</span>Cici — pelanggan <span class="pill ok" style="margin-left:auto">aktif</span></div>
+          <div class="chk"><span class="b n">A</span>Bos Alung — tim <span class="pill off" style="margin-left:auto">belum dibuka</span></div>
+        </div>
+      </div>
+
+      <div class="sec card">
+        <h3>Hayuna <span class="pill ok">Telegram tersambung</span></h3>
+        <div class="muted" style="margin-bottom:10px">Tinggal tanya pakai bahasa biasa — Hayuna yang arahin ke bagian yang benar.</div>
+        <button class="btn">Tanya Hayuna</button>
+        <span style="margin-left:10px;font-size:12.5px;color:#8B857A">Trial gratis — sisa 21 hari.</span>
+      </div>
+    </section>
+
+    <!-- ── PENJUALAN (Koko) ── -->
+    <section class="view" data-view="penjualan">
+      <div class="grid g3">
+        <div class="card"><h3>Omzet hari ini</h3><div class="big">Rp 1.240.000</div></div>
+        <div class="card"><h3>Transaksi</h3><div class="big">32</div></div>
+        <div class="card"><h3>Dibatalkan</h3><div class="big">1</div><div class="muted">bernomor · jejak nol dihapus</div></div>
+      </div>
+      <div class="sec card">
+        <h2 style="font-size:15px;font-weight:800;margin-bottom:10px">Transaksi terakhir</h2>
+        <table>
+          <tr><th>Waktu</th><th>Item</th><th>Jumlah</th><th>Total</th><th>Status</th></tr>
+          <tr><td>14:22</td><td>Nasi Goreng</td><td>3</td><td>Rp 60.000</td><td><span class="pill ok">tercatat</span></td></tr>
+          <tr><td>14:05</td><td>Es Teh</td><td>5</td><td>Rp 25.000</td><td><span class="pill ok">tercatat</span></td></tr>
+          <tr><td>13:47</td><td>Ayam Bakar</td><td>2</td><td>Rp 70.000</td><td><span class="pill warn">dibatalkan #12</span></td></tr>
+        </table>
+      </div>
+      <div class="note"><b>Yang ada di produksi, di luar daftar ini:</b> catat pemasukan (total / per sumber seperti GoFood &amp; tunai) · mode kasir · nota per transaksi yang bisa dicetak · kelola menu &amp; resep.</div>
+    </section>
+
+    <!-- ── STOK (Budi) ── -->
+    <section class="view" data-view="stok">
+      <div class="grid g3">
+        <div class="card"><h3>Bahan terdaftar</h3><div class="big">48</div></div>
+        <div class="card"><h3>Menipis</h3><div class="big">2</div><div class="muted">di bawah ambang</div></div>
+        <div class="card"><h3>Belanja bulan ini</h3><div class="big">Rp 4.320.000</div></div>
+      </div>
+      <div class="sec card">
+        <h2 style="font-size:15px;font-weight:800;margin-bottom:10px">Stok sekarang</h2>
+        <table>
+          <tr><th>Bahan</th><th>Sisa</th><th>Satuan</th><th>Status</th></tr>
+          <tr><td>Beras</td><td>12</td><td>kg</td><td><span class="pill ok">aman</span></td></tr>
+          <tr><td>Ayam</td><td>2,5</td><td>kg</td><td><span class="pill warn">menipis</span></td></tr>
+          <tr><td>Minyak goreng</td><td>1</td><td>liter</td><td><span class="pill warn">menipis</span></td></tr>
+        </table>
+      </div>
+      <div class="note"><b>Yang ada di produksi, di luar daftar ini:</b> catat belanja (satuan &amp; borongan, satuan otomatis dikonversi) · stock opname · koreksi belanja · riwayat gerakan stok · ubah satuan · kelola supplier · tambah bahan baru.</div>
+    </section>
+
+    <!-- ── KEUANGAN (Wulan) ── -->
+    <section class="view" data-view="keuangan">
+      <div class="grid g3">
+        <div class="card"><h3>Omzet bulan ini</h3><div class="big">Rp 31.400.000</div></div>
+        <div class="card"><h3>Modal keluar</h3><div class="big">Rp 19.100.000</div></div>
+        <div class="card"><h3>Laba kotor</h3><div class="big">Rp 12.300.000</div><div class="muted"><span class="pill warn">beta</span> on-read</div></div>
+      </div>
+      <div class="sec card">
+        <h2 style="font-size:15px;font-weight:800;margin-bottom:10px">Pengeluaran terakhir</h2>
+        <table>
+          <tr><th>Tanggal</th><th>Keterangan</th><th>Jumlah</th></tr>
+          <tr><td>26 Jul</td><td>Gaji harian</td><td>Rp 450.000</td></tr>
+          <tr><td>25 Jul</td><td>Listrik</td><td>Rp 380.000</td></tr>
+          <tr><td>24 Jul</td><td>Gas LPG</td><td>Rp 220.000</td></tr>
+        </table>
+      </div>
+      <div class="note"><b>Halaman turunan di produksi:</b> Riwayat Aksi — log jual / batal / koreksi dari dashboard MAUPUN chat, baca-saja.</div>
+    </section>
+
+    <!-- ── PELANGGAN (Cici) ── -->
+    <section class="view" data-view="pelanggan">
+      <div class="grid g3">
+        <div class="card"><h3>Dijawab Cici</h3><div class="big">84</div><div class="muted">7 hari terakhir</div></div>
+        <div class="card"><h3>Naik ke kamu</h3><div class="big">1</div><div class="muted">belum ditangani</div></div>
+        <div class="card"><h3>Bahan jawaban</h3><div class="big">23</div><div class="muted">FAQ tersimpan</div></div>
+      </div>
+      <div class="sec card">
+        <h2 style="font-size:15px;font-weight:800;margin-bottom:10px">Eskalasi — perlu kamu putuskan</h2>
+        <table>
+          <tr><th>Waktu</th><th>Pertanyaan</th><th>Status</th></tr>
+          <tr><td>13:10</td><td>"Bisa pesan 50 box buat kantor besok?"</td><td><span class="pill warn">belum ditangani</span></td></tr>
+          <tr><td>Kemarin</td><td>"Ada menu tanpa pedas?"</td><td><span class="pill ok">selesai</span></td></tr>
+        </table>
+      </div>
+      <div class="note"><b>Halaman turunan di produksi:</b> Pihak (daftar pelanggan + ringkasan belanja per orang) · FAQ Cici (kelola jawaban + unggah PDF/Word jadi bahan, disetujui pemilik dulu).</div>
+    </section>
+
+    <!-- ── TIM (Bos Alung) ── -->
+    <section class="view" data-view="tim">
+      <div class="grid g3">
+        <div class="card"><h3>Staf aktif</h3><div class="big">6</div></div>
+        <div class="card"><h3>Kandidat</h3><div class="big">3</div><div class="muted">2 nunggu dinilai</div></div>
+        <div class="card"><h3>Modul tes</h3><div class="big">4</div><div class="muted">2 terkunci</div></div>
+      </div>
+      <div class="note"><b>Catatan penting:</b> di produksi halaman ini <b>ada kodenya</b>, tapi Bos Alung berstatus <b>belum dibuka</b> — masih menunggu gerbang UU PDP dan tanda tangan Ko. Jangan dipakai bahan jualan.</div>
+    </section>
+    <section class="view" data-view="tim-rekrutmen">
+      <div class="card"><h3>Rekrutmen &amp; seleksi</h3>
+        <div class="muted">Buat modul tes dari SOP warung sendiri, kunci soalnya, kirim ke kandidat, nilai hasilnya.</div>
+      </div>
+      <div class="note">Penilaian <b>deterministik</b> — dicocokkan ke kunci yang sudah dibekukan owner. AI cuma bantu menyusun draf soal, <b>nol menilai orang</b>.</div>
+    </section>
+    <section class="view" data-view="tim-training">
+      <div class="card"><h3>Materi &amp; pelatihan</h3><div class="muted">Bank materi, kirim ke staf, pantau siapa yang sudah mengerjakan.</div></div>
+    </section>
+
+    <!-- ── OPERASIONAL (Bos Afung) ── -->
+    <section class="view" data-view="operasional">
+      <div class="card"><h3>Ringkasan kondisi warung</h3><div class="muted">Baca-saja.</div></div>
+      <div class="note"><b>Catatan penting:</b> halaman ini ada di produksi, tapi <b>Bos Afung belum dibangun</b> — masih sambungan kosong Fase 2. Jangan dijanjikan ke calon klien.</div>
+    </section>
+
+    <!-- ── PENGATURAN ── -->
+    <section class="view" data-view="pengaturan">
+      <div class="grid g2">
+        <div class="card"><h3>Profil bisnis</h3><div class="muted">Nama usaha, jenis, jam buka.</div></div>
+        <div class="card"><h3>Pengguna portal</h3><div class="muted">Undang staf pakai kode, atur peran &amp; izin per orang.</div></div>
+        <div class="card"><h3>Notifikasi</h3><div class="muted">Pilih kejadian mana yang mau dikabarkan.</div></div>
+        <div class="card"><h3>Langganan</h3><div class="muted"><span class="pill off">disembunyikan</span> billing dimatikan — halaman paket nol tampil.</div></div>
+      </div>
+    </section>
+
+    <!-- ── PANEL ADMIN (Ko) ── -->
+    <section class="view" data-view="admin">
+      <div class="grid g3">
+        <div class="card"><h3>Tenant aktif</h3><div class="big">2</div></div>
+        <div class="card"><h3>Trial jalan</h3><div class="big">1</div></div>
+        <div class="card"><h3>Error terangkum</h3><div class="big">4</div><div class="muted">berperingkat bahaya</div></div>
+      </div>
+      <div class="sec card">
+        <h2 style="font-size:15px;font-weight:800;margin-bottom:10px">Tenant</h2>
+        <table>
+          <tr><th>Nama</th><th>Status</th><th>Sisa trial</th><th>Aksi</th></tr>
+          <tr><td>Warung Demo</td><td><span class="pill ok">trial</span></td><td>21 hari</td><td><button class="btn s">Perpanjang</button></td></tr>
+          <tr><td>Kafe Contoh</td><td><span class="pill ok">aktif</span></td><td>—</td><td><button class="btn s">Comp</button></td></tr>
+        </table>
+      </div>
+      <div class="note">Cuma untuk Ko (super-admin). Di produksi: daftar tenant · perpanjang trial · comp · health · log error.</div>
+    </section>
+  </main>
+</div>
+
+<script>
+// Peta judul + keterangan — disalin dari _SHELL_ROUTES di core/portal.py
+var META = {
+  beranda:        ["Beranda", "Ringkasan hari ini", "Beranda"],
+  penjualan:      ["Penjualan", "Dikelola Koko · transaksi & kasir", "Beranda / Penjualan"],
+  stok:           ["Stok", "Dikelola Budi · bahan & inventaris", "Beranda / Stok"],
+  keuangan:       ["Keuangan", "Dikelola Wulan · laba & biaya (on-read)", "Beranda / Keuangan"],
+  pelanggan:      ["Pelanggan", "Dikelola Cici", "Beranda / Pelanggan"],
+  tim:            ["Tim", "Dikelola Bos Alung · skor & perkembangan staf", "Beranda / Tim / Ringkasan"],
+  "tim-rekrutmen":["Tim", "Dikelola Bos Alung · rekrutmen & seleksi", "Beranda / Tim / Rekrutmen"],
+  "tim-training": ["Tim", "Dikelola Bos Alung · materi & pelatihan", "Beranda / Tim / Training"],
+  operasional:    ["Operasional", "Dikelola Bos Afung · checklist harian & absen", "Beranda / Operasional"],
+  pengaturan:     ["Pengaturan", "Profil bisnis · pengguna portal · langganan", "Beranda / Pengaturan"],
+  admin:          ["Panel Admin", "Khusus Ko · tenant, trial, health, log", "Beranda / Admin"]
+};
+
+function buka(v){
+  document.querySelectorAll(".view").forEach(function(s){ s.classList.toggle("on", s.dataset.view === v); });
+
+  var induk = v.indexOf("tim") === 0 ? "tim" : v;
+  document.querySelectorAll(".nav > a").forEach(function(a){
+    a.classList.remove("on","parent");
+    if (a.dataset.v === induk) a.classList.add(v.indexOf("tim-") === 0 ? "parent" : "on");
+  });
+
+  // Sub-menu Tim cuma muncul pas lagi di halaman Tim — sama seperti produksi.
+  var sub = document.getElementById("subtim");
+  sub.style.display = induk === "tim" ? "flex" : "none";
+  sub.querySelectorAll("a").forEach(function(a){ a.classList.toggle("on", a.dataset.v === v); });
+
+  var m = META[v] || META.beranda;
+  document.getElementById("ptitle").textContent = m[0];
+  document.getElementById("psub").textContent   = m[1];
+  document.getElementById("crumb").textContent  = m[2];
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll("[data-v]").forEach(function(a){
+  a.addEventListener("click", function(){ buka(a.dataset.v); });
+});
+</script>
+</body>
+</html>
